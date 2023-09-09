@@ -1,0 +1,21 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/4.ico</file>
+        <file>icons/6.ico</file>
+        <file>icons/9.ico</file>
+        <file>icons/10.ico</file>
+        <file>icons/17.ico</file>
+        <file>icons/20.ico</file>
+        <file>icons/24.ico</file>
+        <file>icons/27.ico</file>
+        <file>icons/31.ico</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file>images/back1.jpg</file>
+        <file>images/back2.jpg</file>
+        <file>images/back3.jpg</file>
+        <file>images/back5.jpg</file>
+        <file>images/Warning.png</file>
+        <file>images/Warning_m.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,23 @@
+#ifndef CONFIGURATIONS
+#define CONFIGURATIONS
+
+#include <QtGlobal>
+
+#define WIDTH_START 600
+#define HEIGHT_START 600
+#define SIZE_MIN_WIN QSize(300,300)
+#define RECT_MAIN_MENU(w,h) QRect((w)*2/5,(h)*3/5,(w)/5,(h)*2/5)
+#define POINT_QUIT_MENU(w,h) QPoint((w)/2-150,(h)/3-100)
+
+#define ICON_WINDOW ":/icons/icons/24.ico"
+#define BG_MAIN_MENU ":/images/images/back1.jpg"
+#define BG_OTHER_MENU ":/images/images/back5.jpg"
+
+//#if defined(QT_DEBUG)
+//#define LOG(fmt,...) \
+//printf("[FILE: %s][FUNC: %s][LINE: %d]" fmt, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+//#else
+//#define LOG(fmt,...) (void)0
+//#endif
+
+#endif // CONFIGURATIONS

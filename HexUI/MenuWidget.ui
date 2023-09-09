@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MenuWidget</class>
+ <widget class="QWidget" name="MenuWidget">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="sizeIncrement">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::NoContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget
+{
+  background: transparent;
+}
+
+QPushButton
+{
+  min-height: 42.85px;
+  font: 24pt &quot;华文行楷&quot;;
+  background: transparent;
+  outline: none;
+  color: rgb(251, 246, 208);
+}
+
+QPushButton:focus
+{
+  font: 30pt;
+  color: rgb(255, 255, 23);
+}
+
+QPushButton:pressed
+{
+  color: white;
+}
+
+QLabel
+{
+  font: 24pt &quot;华文行楷&quot;;
+  color: rgb(251, 246, 208);
+  background: transparent;
+}</string>
+  </property>
+  <widget class="QWidget" name="MainWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>10</y>
+     <width>200</width>
+     <height>300</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <layout class="QGridLayout" name="Layout_main">
+    <item row="2" column="1">
+     <widget class="QPushButton" name="Button_options">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>45</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>华文行楷</family>
+        <pointsize>24</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string> 选项 </string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QPushButton" name="Button_more">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>45</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>华文行楷</family>
+        <pointsize>24</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string> 更多 </string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QPushButton" name="Button_quit">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>45</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>华文行楷</family>
+        <pointsize>24</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string> 退出 </string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="Button_start">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>45</height>
+       </size>
+      </property>
+      <property name="sizeIncrement">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="baseSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>华文行楷</family>
+        <pointsize>24</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="tabletTracking">
+       <bool>false</bool>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string> 开始 </string>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <spacer name="Spacer_interval_1">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Preferred</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="7" column="0">
+     <spacer name="Spacer_left">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Expanding</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="5" column="1">
+     <spacer name="Spacer_interval_3">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Preferred</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="3" column="1">
+     <spacer name="Spacer_interval_2">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Preferred</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="7" column="1">
+     <spacer name="Spacer_bottom">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Preferred</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="7" column="2">
+     <spacer name="Spacer_ringht">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Expanding</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="QuitWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>10</y>
+     <width>300</width>
+     <height>300</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QWidget
+{
+  background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 0), stop:0.147727 rgba(0, 0, 0, 80), stop:0.5 rgba(0, 0, 0, 155), stop:0.852273 rgba(0, 0, 0, 80), stop:1 rgba(0, 0, 0, 0));
+}
+
+QPushButton
+{
+  min-height: 48px;
+  font: 24pt &quot;华文行楷&quot; rgb(251, 246, 208);
+  margin: 5px 0px 2px 0px;
+  background: qlineargradient(spread:repeat, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(153, 153, 153, 0), stop:0.150838 rgba(153, 153, 153, 80), stop:0.49162 rgba(153, 153, 153, 155), stop:0.843575 rgba(153, 153, 153, 80), stop:1 rgba(153, 153, 153, 0));
+  outline: none;
+  border: none;
+}
+
+QPushButton:focus
+{
+  font: 30pt rgb(255, 255, 23);
+  border-top: 1px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 80), stop:0.505682 rgba(255, 255, 255, 255), stop:1 rgba(0, 0, 0, 80));
+  border-bottom: 1px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(0, 0, 0, 80), stop:0.505682 rgba(255, 255, 255, 255), stop:1 rgba(0, 0, 0, 80));
+}</string>
+   </property>
+   <layout class="QVBoxLayout" name="Layout_quit">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="styleSheet">
+       <string notr="true">image: url(:/images/images/Warning_m.png);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="Lable_quit">
+      <property name="font">
+       <font>
+        <family>华文行楷</family>
+        <pointsize>24</pointsize>
+        <italic>false</italic>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>确定要退出游戏吗？</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="Button_true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>55</height>
+       </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QPushButton:focus
+{
+  font: 30pt;
+  color: red;
+}</string>
+      </property>
+      <property name="text">
+       <string>确定</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="Button_false">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>55</height>
+       </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::WheelFocus</enum>
+      </property>
+      <property name="text">
+       <string>取消</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>Button_false</tabstop>
+  <tabstop>Button_true</tabstop>
+  <tabstop>Button_quit</tabstop>
+  <tabstop>Button_start</tabstop>
+  <tabstop>Button_options</tabstop>
+  <tabstop>Button_more</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
