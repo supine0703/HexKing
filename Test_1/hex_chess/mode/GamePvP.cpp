@@ -1,7 +1,7 @@
 #include "GamePvP.h"
 
-GamePvP::GamePvP(bool *end, HexMatch *_match, QVector<HexPoint> *_winner)
-    : GameMode::GameMode(end, _match, _winner)
+GamePvP::GamePvP(bool *end, HexMatch *_match, QVector<HexPoint> *_winner, QObject *parent)
+    : GameMode::GameMode(end, _match, _winner, parent)
 {
 }
 

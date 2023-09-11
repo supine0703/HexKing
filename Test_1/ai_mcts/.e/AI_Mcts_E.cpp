@@ -12,12 +12,17 @@ AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized, QObje
     , ecf(ecf)
     , endTime(max_decision_time * 1000)
     , parallelized(parallelized)
+    , pool(parallelized ? new QThreadPool() : nullptr)
 {
 }
 
 AI_Mcts_E::~AI_Mcts_E()
 {
-    QThreadPool::globalInstance()->waitForDone();
+    if (parallelized)
+    {
+        pool->waitForDone();
+        delete pool;
+    }
 }
 
 HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
@@ -40,7 +45,6 @@ HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
     root = nullptr;
     delete usedTime;
     usedTime = nullptr;
-//    ThisMatchEnd();
     return bestMove;
 }
 
@@ -65,7 +69,6 @@ void AI_Mcts_E::MctsSearch(int &itCounter, const HexMatch &board)
          * This happens if the board (local variable) is not copied.
          */
         HexMatch boardCopy(board);
-        QThreadPool *pool = QThreadPool::globalInstance();
         while (usedTime->elapsed() < endTime)
         {
             MctsWork *work = new MctsWork(SelectChildPlayout(), boardCopy);

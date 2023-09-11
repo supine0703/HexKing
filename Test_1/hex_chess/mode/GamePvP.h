@@ -6,7 +6,7 @@
 class GamePvP : public GameMode
 {
 public:
-    GamePvP(bool *end, HexMatch *_match, QVector<HexPoint> *_winner);
+    GamePvP(bool *end, HexMatch *_match, QVector<HexPoint> *_winner, QObject *parent = nullptr);
 
     bool IsPlayer() override;
     void Determine(HexAttacker _attacker) override;

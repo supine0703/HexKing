@@ -8,11 +8,13 @@
 class GamePvE : public GameMode
 {
 public:
-    GamePvE(bool *end,
+    GamePvE(
+        bool *end,
         HexMatch *_match,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
-        bool isWhite
+        bool isWhite,
+        QObject *parent = nullptr
     );
 
     void AIWork() override;

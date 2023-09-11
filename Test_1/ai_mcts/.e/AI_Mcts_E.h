@@ -3,10 +3,9 @@
 
 #include <QObject>
 #include <QSharedPointer>
-//#include "MctsNode.h"
-//#include "MctsWork.h"
 #include "HexMatch.hpp"
 
+class QThreadPool;
 class QElapsedTimer;
 class MctsNode;
 class MctsWork;
@@ -37,32 +36,13 @@ private:
 
     QSharedPointer<MctsNode> BestChild();
 
-//    void ThisMatchEnd();
-
-//    void ExpandNode(const QSharedPointer<MctsNode>& node, const HexMatch& board);
-
-//    QSharedPointer<MctsNode> SelectChildPlayout(const QSharedPointer<MctsNode>& parent);
-
-//    double UCTScore(
-//        const QSharedPointer<MctsNode>& child,
-//        const QSharedPointer<MctsNode>& parent
-//    );
-
-//    int _Num;
-//    const QVector<QThread*>& threads;
-//    QVector<SimulatePlayout*> works;
     double ecf;
     int endTime;
     bool parallelized;
-//    QAtomicInt workCount;
     QElapsedTimer* usedTime;
     QSharedPointer<MctsNode> root;
-//    bool isSleep = false;
-//    QVector<MctsWork*> works;
-signals:
-//    void Wake();
-//    void Finished();
-//    void Working(const QSharedPointer<MctsNode>& node, _Board board);
+    QThreadPool *pool;
+
 };
 
 #endif // AI_MCTS_E_H
