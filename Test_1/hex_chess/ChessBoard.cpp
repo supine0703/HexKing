@@ -58,11 +58,6 @@ ChessBoard::ChessBoard(QWidget *parent)
     case _GMode::_PvE:
         gameMode = new GamePvE(&isEnd, match, winnerRoute, &attacker, isPlayer);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
-//        connect(this, &ChessBoard::isEnvironment, this, [=]() {
-//            if (!isPlayer) {
-//                emit AIWorking();
-//            }
-//        });
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             PlaceChessPieces(_row, _col);
         });
@@ -116,7 +111,6 @@ ChessBoard::~ChessBoard()
     
     delete match;
     delete gameMode;
-
 }
 
 void ChessBoard::resizeEvent(QResizeEvent *event)

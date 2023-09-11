@@ -17,6 +17,7 @@ AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized, QObje
 
 AI_Mcts_E::~AI_Mcts_E()
 {
+    QThreadPool::globalInstance()->waitForDone();
 }
 
 HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
@@ -30,7 +31,7 @@ HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
     usedTime->start();
     // Run MCTS until the timer runs out to update root's and its children's
     // statistics
-    MtcsSearch(mcts_itCounter, board);
+    MctsSearch(mcts_itCounter, board);
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
     qDebug() << bestChild->GetWinsNum() << bestChild->GetVisitedNum()
@@ -54,17 +55,20 @@ void AI_Mcts_E::ExpandNode(const HexMatch &board)
     }
 }
 
-void AI_Mcts_E::MtcsSearch(int &itCounter, const HexMatch &board)
+void AI_Mcts_E::MctsSearch(int &itCounter, const HexMatch &board)
 {
     if (parallelized)
     {
+        /**
+         * @brief boardCopy, a copy of board.
+         * @bug I don't know why the cells (QVector member of MctsWork) will overload.
+         * This happens if the board (local variable) is not copied.
+         */
+        HexMatch boardCopy(board);
         QThreadPool *pool = QThreadPool::globalInstance();
         while (usedTime->elapsed() < endTime)
         {
-            static int num = 0;
-//            qDebug() << "start" << ++num;
-            MctsWork *work = new MctsWork(SelectChildPlayout(), board);
-//            qDebug() << "end";
+            MctsWork *work = new MctsWork(SelectChildPlayout(), boardCopy);
             if (!pool->tryStart(work))
             {
                 work->deleteLater();
@@ -135,62 +139,3 @@ QSharedPointer<MctsNode> AI_Mcts_E::BestChild()
     Q_ASSERT(bestChild);
     return bestChild;
 }
-
-//void AI_Mcts_E::ThisMatchEnd()
-//{
-//    root = nullptr;
-//    delete usedTime;
-//    usedTime = nullptr;
-//}
-
-//void AI_Mcts_E::ExpandNode(const QSharedPointer<MctsNode> &node, const HexMatch &board)
-//{
-//    QVector<HexPoint> validMoves = GetValidMoves(board);
-
-//    for (const auto& move : validMoves)
-//    {
-//        node->children.push_back(
-//            QSharedPointer<MctsNode>(new MctsNode(node->GetAttacker(), move, node))
-//            );
-//    }
-//}
-
-//QSharedPointer<MctsNode> AI_Mcts_E::SelectChildPlayout(
-//    const QSharedPointer<MctsNode> &parent)
-//{
-//    // Initialize best_child as the first child and calculate its UCT score
-//    QSharedPointer<MctsNode> bestChild = parent->children[0];
-//    double maxScore = UCTScore(bestChild, parent);
-//    // Iterate over the remaining child nodes to find the one with the highest UCT score
-//    for (int i = 1, end = parent->children.count(); i < end; i++)
-//    {
-//        const auto& child = parent->children[i];
-//        double uctScore = UCTScore(child, parent);
-//        if (uctScore > maxScore)
-//        {
-//            maxScore = uctScore;
-//            bestChild = child;
-//        }
-//    }
-//    return bestChild;
-//}
-
-//double AI_Mcts_E::UCTScore(
-//    const QSharedPointer<MctsNode> &child,
-//    const QSharedPointer<MctsNode> &parent)
-//{
-//    // If any child node has not been visited yet, return a high value to
-//    // encourage exploration
-//    if (child->GetVisitedNum() == 0)
-//    {
-//        return qInf(); // double max
-//    }
-//    else
-//    {
-//        // Otherwise, calculate the UCT score using the UCT formula.
-//        return static_cast<double>(
-//            child->GetWinsNum()) / child->GetVisitedNum() +
-//            ecf * qSqrt(qLn(parent->GetVisitedNum()) / child->GetVisitedNum()
-//        );
-//    }
-//}

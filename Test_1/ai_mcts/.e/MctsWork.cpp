@@ -2,6 +2,20 @@
 
 #include <QRandomGenerator>
 
+/**
+ * @brief MctsWork::MctsWork
+ * @param match
+ * @property board
+ *
+ * @bug When board copy match could lead to QVector member of board unfinished
+ * copy if match comes from const reference parameter of calling function, so
+ * in class AI_Mcts_E I have used provisional member boardCopy copied const
+ * reference parameter board.
+ *
+ * @bug If I don't do this, board[_r].at(_c) will overload beacuse there are
+ * probably no members inside board[_r].
+ */
+
 MctsWork::MctsWork(
     const QSharedPointer<MctsNode> &child,
     const HexMatch &match,

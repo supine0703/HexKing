@@ -28,8 +28,8 @@ public:
 private:
 
     void ExpandNode(const HexMatch& board);
-
-    void MtcsSearch(int& itCounter, const HexMatch& board);
+    
+    void MctsSearch(int& itCounter, const HexMatch& board);
 
     QSharedPointer<MctsNode> SelectChildPlayout();
 

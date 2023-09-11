@@ -1,7 +1,6 @@
 #ifndef HEXATTACKER_HPP
 #define HEXATTACKER_HPP
 
-#include <QPair>
 #include <QVector>
 
 using HexAttacker_t = bool;
@@ -40,6 +39,7 @@ class HexMatch
 {
 public:
     HexMatch(const int& order) : order(order), cells(order, QVector<HexCell>(order, HexCell::Empty)) {}
+//    HexMatch(const HexMatch& other) : order(other.order), cells(other.cells) {}
     QVector<HexCell>& operator[](const int& i) { return cells[i]; }
     HexCell& GetCell(const HexPoint& coord) { return cells[coord.row][coord.col]; }
     HexCell& GetCell(const int& row, const int& col) { return cells[row][col]; }

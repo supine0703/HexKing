@@ -2,7 +2,7 @@
 
 #include <QDebug>
 
-#define _VERSION_ 'A'
+#define _VERSION_ 'E'
 #define _ECF_ 1.41
 #define _TIME_ 5
 #define _PARALLELIZED_ true

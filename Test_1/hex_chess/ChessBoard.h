@@ -20,11 +20,6 @@ enum class _GMode : gmode_t
 class ChessBoard : public QWidget
 {
     Q_OBJECT
-signals:
-    void setPieces(int row, int col);
-    void isEnvironment();
-    void AIWorking();
-
 public:
     ChessBoard(QWidget *parent = nullptr);
     ~ChessBoard();
@@ -110,6 +105,10 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
+
+signals:
+    void setPieces(int row, int col);
+    void AIWorking();
 };
 
 #endif // CHESSBOARD_H

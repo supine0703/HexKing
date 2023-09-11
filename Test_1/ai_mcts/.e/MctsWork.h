@@ -29,7 +29,7 @@ private:
     QSharedPointer<MctsNode> node;
 
 signals:
-    void Finished();
+//    void Finished();
 };
 
 #endif // MCTSWORK_HPP
