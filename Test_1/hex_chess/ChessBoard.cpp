@@ -402,7 +402,7 @@ void ChessBoard::PaintProjection()
         _col <<= 1;
         QPainter painter(this);
         painter.setPen(QPen(Qt::transparent, 0));
-        painter.setBrush(static_cast<bool>(attacker) ? *white_t : *black_t);
+        painter.setBrush(*attacker ? *white_t : *black_t);
         QPointF centre = ((*points)[_row][_col+1] + (*points)[_row+1][_col+2]) / 2;
         painter.drawEllipse(centre, radius_dotted, radius_dotted);
         painter.end(); // end
@@ -437,15 +437,13 @@ void ChessBoard::PlaceChessPieces(int row, int col)
     Q_ASSERT((*match)[row][col] == HexCell::Empty);
     (*match)[row][col] = static_cast<HexCell>(attacker);
     emit setPieces(row, col);
-    qDebug() << (static_cast<bool>(attacker) ? "White:" : "Black:")
+    qDebug() << (*attacker ? "White:" : "Black:")
         << "(" << row << "," << col << ")" << Qt::endl;
     ConditionsDetermine();
     update();
     if (!isPlayer && !isEnd)
     {
-//        qDebug() << "----------AI is thinking----------" << Qt::endl;
         emit AIWorking();
-//        emit isEnvironment();
     }
 }
 
@@ -454,7 +452,7 @@ void ChessBoard::ConditionsDetermine()
     gameMode->Determine(attacker);
     if (isEnd)
     {
-        qDebug() << "The winer is :" << (static_cast<bool>(attacker) ? "White" : "Black");
+        qDebug() << "The winer is :" << (*attacker ? "White" : "Black");
         UpdateWinnerPath();
         return;
     }

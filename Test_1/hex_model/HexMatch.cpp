@@ -11,7 +11,7 @@ bool HexMatch::WinnerDecided(const HexAttacker& attacker) const
     QStack<HexPoint> stack;
     QVector<HexPoint> visited;
 
-    for (int &p = num[static_cast<int>(!attacker)]; p < order; p++)
+    for (int &p = num[*(!attacker)]; p < order; p++)
     {
         if (cells[r][c] == attacker)
         {
@@ -34,7 +34,7 @@ bool HexMatch::WinnerDecided(const HexAttacker& attacker) const
         visited.push_back({r, c});
 
         // win
-        if (num[static_cast<int>(attacker)] == order - 1)
+        if (num[*attacker] == order - 1)
         {
             return true;
         }

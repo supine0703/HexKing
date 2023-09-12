@@ -86,6 +86,11 @@ inline constexpr HexAttacker operator!(const HexAttacker& attacker)
 {
     return static_cast<HexAttacker>(!static_cast<bool>(attacker));
 }
+
+inline constexpr bool operator*(const HexAttacker& attacker)
+{
+    return static_cast<bool>(attacker);
+}
 //-------------------------HexAttacker------------------------
 
 //----------------------------Cell----------------------------

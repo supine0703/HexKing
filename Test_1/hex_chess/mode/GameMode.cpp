@@ -41,7 +41,7 @@ bool GameMode::Outcome()
     QVector<QPair<int, int>> visiting;
     RouteGraph route;
 
-    for (int &p = num[static_cast<int>(!attacker)]; p < order; p++)
+    for (int &p = num[*(!attacker)]; p < order; p++)
     {
         if (_match[r][c] == attacker)
         {
@@ -67,7 +67,7 @@ bool GameMode::Outcome()
         visiting.push_back({r, c});
 
         // win
-        if (num[static_cast<int>(attacker)] == order - 1)
+        if (num[*attacker] == order - 1)
         {
             route.PushWinner(r, c, index);
             *end = true;
