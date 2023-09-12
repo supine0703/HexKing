@@ -34,7 +34,8 @@ HexPoint AI_Mcts_A::ChooseMove(const HexMatch &board, HexAttacker attacker)
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
     qDebug() << bestChild->GetWinsNum() << bestChild->GetVisitedNum()
-             << "| total:" << root->GetVisitedNum() << Qt::endl;
+             << "| total:" << root->GetVisitedNum()
+             << "| time:" << usedTime.elapsed() << Qt::endl;
     return bestChild->GetMove();
 }
 
@@ -126,7 +127,7 @@ HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, Hex
     HexAttacker currentAttacker = node->GetAttacker();
     // Make the move at the node to make random moves from it
     auto [_r, _c] = node->GetMove();
-    board[_r][_c] = static_cast<HexCell>(currentAttacker);
+    board(_r, _c) = static_cast<HexCell>(currentAttacker);
     // Continue simulation until a winner is detected
     while (!board.WinnerDecided(currentAttacker))
     {
@@ -136,7 +137,7 @@ HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, Hex
         QVector<HexPoint> validMoves = GetValidMoves(board);
         // Generate a distribution and choose a move randomly
         auto [__r, __c] = validMoves[random.bounded(validMoves.size())];
-        board[__r][__c] = static_cast<HexCell>(currentAttacker);
+        board(__r, __c) = static_cast<HexCell>(currentAttacker);
     }
     return currentAttacker;
 }
@@ -204,11 +205,11 @@ QSharedPointer<MctsNode> AI_Mcts_A::BestChild()
 QVector<HexPoint> AI_Mcts_A::GetValidMoves(const HexMatch &board)
 {
     QVector<HexPoint> validMoves;
-    for (int i = 0, end = board.Order(); i < end; i++)
+    for (int i = 0, end = board.GetOrder(); i < end; i++)
     {
         for (int j = 0; j < end; j++)
         {
-            if (board[i][j] == HexCell::Empty)
+            if (board(i, j) == HexCell::Empty)
             {
                 validMoves.push_back(qMakePair(i, j));
             }

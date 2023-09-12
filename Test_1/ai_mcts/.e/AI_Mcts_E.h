@@ -43,6 +43,7 @@ private:
     QSharedPointer<MctsNode> root;
     QThreadPool *pool;
 
+    bool exit = false;
 };
 
 #endif // AI_MCTS_E_H

@@ -30,12 +30,12 @@ void GamePvE::AIWork()
 {
 #if _VERSION_ == 'A'
     qDebug() << "----------AI_Mcts_A is thinking----------" << Qt::endl;
-    AI_Mcts_A AI(_ECF_, _TIME_, _PARALLELIZED_, this);
+    AI_Mcts_A *AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_));
 #elif _VERSION_ == 'E'
     qDebug() << "----------AI_Mcts_E is thinking----------" << Qt::endl;
-    AI_Mcts_E AI(_ECF_, _TIME_, _PARALLELIZED_, this);
+    AI_Mcts_E *AI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_, this));
 #endif
-    auto [row, col] = AI.ChooseMove(*match, *nowAttacker);
+    auto [row, col] = AI->ChooseMove(*match, *nowAttacker);
     emit placeChess(row, col);
 }
 

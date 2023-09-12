@@ -1,7 +1,7 @@
 #ifndef HEXATTACKER_HPP
 #define HEXATTACKER_HPP
 
-#include <QVector>
+#include <QPair>
 
 using HexAttacker_t = bool;
 enum class HexAttacker : HexAttacker_t
@@ -15,7 +15,7 @@ enum class HexCell : HexCell_t
 {
     Black = 0,
     White = 1,
-    Empty = -1
+    Empty = 2
 };
 
 class HexPoint
@@ -25,11 +25,11 @@ public:
     HexPoint(const QPair<int, int>& pair) : row(pair.first), col(pair.second) {}
     inline constexpr bool operator==(const HexPoint& other) const
     {
-        return row == other.row && col == other.col;
+        return (row == other.row) && (col == other.col);
     }
     inline constexpr bool operator!=(const HexPoint& other) const
     {
-        return row != other.row || col != other.col;
+        return (row != other.row) || (col != other.col);
     }
     uint8_t row;
     uint8_t col;
@@ -38,27 +38,27 @@ public:
 class HexMatch
 {
 public:
-    HexMatch(const int& order) : order(order), cells(order, QVector<HexCell>(order, HexCell::Empty)) {}
-//    HexMatch(const HexMatch& other) : order(other.order), cells(other.cells) {}
-    QVector<HexCell>& operator[](const int& i) { return cells[i]; }
-    HexCell& GetCell(const HexPoint& coord) { return cells[coord.row][coord.col]; }
-    HexCell& GetCell(const int& row, const int& col) { return cells[row][col]; }
+    HexMatch(const int& order);
+    HexMatch(const HexMatch& other);
+    ~HexMatch();
 
-    const QVector<HexCell>& operator[](const int& i) const { return cells[i]; }
-    const HexCell& GetCell(const HexPoint& coord) const { return cells[coord.row][coord.col]; }
-    const HexCell& GetCell(const int& row, const int& col) const { return cells[row][col]; }
+    HexMatch& operator=(const HexMatch& other);
+    HexCell& operator()(const HexPoint& point);
+    HexCell& operator()(const int& row, const int& col);
+    const HexCell& operator()(const HexPoint& point) const;
+    const HexCell& operator()(const int& row, const int& col) const;
 
-    auto begin() const { return cells.begin(); }
-    auto end() const { return cells.end(); }
-    auto begin() { return cells.begin(); }
-    auto end() { return cells.end(); }
+    HexCell& GetCell(const HexPoint& point);
+    HexCell& GetCell(const int& row, const int& col);
+    const HexCell& GetCell(const HexPoint& point) const;
+    const HexCell& GetCell(const int& row, const int& col) const;
 
-    int Order() const { return order; }
+    int GetOrder() const;
     bool WinnerDecided(const HexAttacker& attacker) const;
 
 private:
-    const uint8_t order;
-    QVector<QVector<HexCell>> cells;
+    uint8_t order;
+    HexCell* cells;
 };
 
 //-------------------------HexAttacker------------------------

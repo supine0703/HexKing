@@ -30,7 +30,7 @@ bool GameMode::Outcome()
     {
         return false;
     }
-    int order = _match.Order();
+    int order = _match.GetOrder();
     int num[2] { 0, 0 };
     int &r = num[0];
     int &c = num[1];
@@ -43,7 +43,7 @@ bool GameMode::Outcome()
 
     for (int &p = num[*(!attacker)]; p < order; p++)
     {
-        if (_match[r][c] == attacker)
+        if (_match(r, c) == attacker)
         {
             depth_i++;
             queue.enqueue({{r, c}, route.Push(r, c)});
@@ -116,17 +116,17 @@ bool GameMode::Outcome()
             }
             int _r = r + r_add;
             int _c = c + c_add;
-            if (!visited.contains({_r, _c}) && _match[_r][_c] == attacker)
+            if (!visited.contains({_r, _c}) && _match(_r, _c) == attacker)
             {
                 queue.enqueue({{_r, _c}, route.PushBack(_r, _c, _i)});
             }
         };
-        _enQ(-1, 0, index);
-        _enQ(-1, 1, index);
-        _enQ(0, -1, index);
-        _enQ(1, -1, index);
         _enQ(1, 0, index);
         _enQ(0, 1, index);
+        _enQ(-1, 1, index);
+        _enQ(-1, 0, index);
+        _enQ(0, -1, index);
+        _enQ(1, -1, index);
     }
     if (*end)
     {

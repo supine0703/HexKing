@@ -1,6 +1,7 @@
 #ifndef ROUTEGRAPH_H
 #define ROUTEGRAPH_H
 
+#include <QVector>
 #include "HexMatch.hpp"
 #include "RouteNode.hpp"
 

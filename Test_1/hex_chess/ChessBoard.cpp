@@ -12,7 +12,7 @@
 //#include "Match.hpp"
 
 #define _GMODE _GMode::_PvE
-#define _ORDER 5
+#define _ORDER 7
 #define _RADIO 1
 #define _FIRST 1
 #define _BORDER_RH 0.25
@@ -220,7 +220,7 @@ void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
     {
         if (0 <= press_row && press_row < order && 0 <= press_col && press_col <= order)
         {
-        if ((*match)[press_row][press_col] == HexCell::Empty)
+        if (match->GetCell(press_row, press_col) == HexCell::Empty)
             {
                 PlaceChessPieces(press_row, press_col);
             }
@@ -381,9 +381,9 @@ void ChessBoard::PaintPiecesPlaced()
         QPointF centre = ((*points)[i][1] + (*points)[i+1][2]) / 2;
         for (int j = 0; j < order; j++)
         {
-            if ((*match)[i][j] != HexCell::Empty)
+            if (match->GetCell(i, j) != HexCell::Empty)
             {
-                painter.setBrush(*_c[(char)(*match)[i][j]]);
+                painter.setBrush(*_c[static_cast<int>(match->GetCell(i, j))]);
 //                painter.setBrush((*pieces)[i][j] != _Piece::First ? *second : *first);
                 painter.drawEllipse(centre + add * j, radius_solid, radius_solid);
             }
@@ -397,7 +397,7 @@ void ChessBoard::PaintProjection()
 {
     int _row = mouse_row;
     int _col = mouse_col;
-    if (_row != -1 && (*match)[_row][_col] == HexCell::Empty)
+    if (_row != -1 && match->GetCell(_row, _col) == HexCell::Empty)
     {
         _col <<= 1;
         QPainter painter(this);
@@ -434,8 +434,8 @@ void ChessBoard::PaintOtherComponents()
 void ChessBoard::PlaceChessPieces(int row, int col)
 {
     Q_ASSERT((0 <= row && row < order && 0 <= col && col <= order));
-    Q_ASSERT((*match)[row][col] == HexCell::Empty);
-    (*match)[row][col] = static_cast<HexCell>(attacker);
+    Q_ASSERT(match->GetCell(row, col) == HexCell::Empty);
+    match->GetCell(row, col) = static_cast<HexCell>(attacker);
     emit setPieces(row, col);
     qDebug() << (*attacker ? "White:" : "Black:")
         << "(" << row << "," << col << ")" << Qt::endl;

@@ -20,6 +20,7 @@ AI_Mcts_E::~AI_Mcts_E()
 {
     if (parallelized)
     {
+        exit = true;
         pool->waitForDone();
         delete pool;
     }
@@ -40,7 +41,8 @@ HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
     qDebug() << bestChild->GetWinsNum() << bestChild->GetVisitedNum()
-             << "| total:" << root->GetVisitedNum() << Qt::endl;
+             << "| total:" << root->GetVisitedNum()
+             << "| time:" << usedTime->elapsed() << Qt::endl;
     HexPoint bestMove = bestChild->GetMove();
     root = nullptr;
     delete usedTime;
@@ -65,16 +67,19 @@ void AI_Mcts_E::MctsSearch(int &itCounter, const HexMatch &board)
     {
         /**
          * @brief boardCopy, a copy of board.
-         * @bug I don't know why the cells (QVector member of MctsWork) will overload.
+         * @bug I don't know why the cells (QVector member of MctsWork) will overflow.
          * This happens if the board (local variable) is not copied.
+         * @resolve I guess the problem may come from QVector beacuse the bug didn't
+         * reappear after I replaced QVector with a self-defined array.
          */
-        HexMatch boardCopy(board);
-        while (usedTime->elapsed() < endTime)
+//        HexMatch boardCopy(board);
+        while (!exit && usedTime->elapsed() < endTime)
         {
-            MctsWork *work = new MctsWork(SelectChildPlayout(), boardCopy);
+//            MctsWork *work = new MctsWork(SelectChildPlayout(), boardCopy);
+            MctsWork *work = new MctsWork(SelectChildPlayout(), board);
             if (!pool->tryStart(work))
             {
-                work->deleteLater();
+                delete work;
             }
         }
         pool->waitForDone();

@@ -1,6 +1,7 @@
 #ifndef MCTSNODE_H
 #define MCTSNODE_H
 
+#include <QVector>
 #include <QSharedPointer>
 #include "HexMatch.hpp"
 

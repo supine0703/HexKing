@@ -1,14 +1,13 @@
 #ifndef ROUTENODE_H
 #define ROUTENODE_H
 
-#include <type_traits>
 #include <cstdint>
 
 class RouteNode
 {
 public:
     RouteNode(const int &_row, const int &_col, RouteNode *const &_pre);
-    ~RouteNode();
+    ~RouteNode() = default;
 
     int Row() const;
     int Col() const;
@@ -27,10 +26,6 @@ inline RouteNode::RouteNode(const int &_row, const int &_col, RouteNode *const &
     , col(_col)
     , depth(_pre != nullptr ? _pre->depth : 0)
     , pre(_pre)
-{
-}
-
-inline RouteNode::~RouteNode()
 {
 }
 
