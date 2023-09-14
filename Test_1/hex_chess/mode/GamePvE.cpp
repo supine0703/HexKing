@@ -26,7 +26,7 @@ GamePvE::GamePvE(
 {
 }
 
-void GamePvE::AIWork()
+void GamePvE::AIWork1()
 {
 #if _VERSION_ == 'A'
     qDebug() << "----------AI_Mcts_A is thinking----------" << Qt::endl;

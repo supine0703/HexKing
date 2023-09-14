@@ -64,6 +64,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Test_1
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        hex_chess/mode/GameEvE.h hex_chess/mode/GameEvE.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Test_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

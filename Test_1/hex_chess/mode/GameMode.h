@@ -27,7 +27,8 @@ protected:
 
 public:
     virtual ~GameMode();
-    virtual void AIWork();
+    virtual void AIWork1();
+    virtual void AIWork2();
     virtual bool IsPlayer() = 0;
     virtual void Determine(HexAttacker _attacker) = 0;
 };

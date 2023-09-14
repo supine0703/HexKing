@@ -18,7 +18,11 @@ GameMode::~GameMode()
     winnerRoute = nullptr;
 }
 
-void GameMode::AIWork()
+void GameMode::AIWork1()
+{
+}
+
+void GameMode::AIWork2()
 {
 }
 

@@ -1,9 +1,11 @@
 #include "ChessBoard.h"
 #include "GamePvP.h"
+#include "GameEvE.h"
 #include "GamePvE.h"
 
-#include <QPushButton>
 
+#include <QPushButton>
+#include <QLabel>
 #include <QPainterPath>
 #include <QMouseEvent>
 #include <QPainter>
@@ -11,7 +13,7 @@
 #include <QtMath>
 //#include "Match.hpp"
 
-#define _GMODE _GMode::_PvE
+#define _GMODE _GMode::_EvE
 #define _ORDER 7
 #define _RADIO 1
 #define _FIRST 1
@@ -57,14 +59,27 @@ ChessBoard::ChessBoard(QWidget *parent)
         break;
     case _GMode::_PvE:
         gameMode = new GamePvE(&isEnd, match, winnerRoute, &attacker, isPlayer);
-        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
+        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork1);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             PlaceChessPieces(_row, _col);
         });
         AIThread->start();
         break;
     case _GMode::_EvE:
+        ChessBoard::isPlayer=false;
+        gameMode = new GameEvE(&isEnd, match, winnerRoute, &attacker, isPlayer);
+        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork1);
+        connect(this, &ChessBoard::setPieces, gameMode, &GameMode::AIWork2);
+        connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
+            PlaceChessPieces(_row, _col);
+        });
 
+        AIThread->start();
+//        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork2);
+//        connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
+//            PlaceChessPieces(_row, _col);
+//        });
+//        AIThread->start();
         break;
     }
     gameMode->moveToThread(AIThread);
@@ -83,13 +98,23 @@ ChessBoard::ChessBoard(QWidget *parent)
 
     if (!isPlayer)
     {
-        Test = new QPushButton("AI First", this);
-        Test->setGeometry(0, 0, 200, 80);
-        Test->setFont(QFont(fontName, 24));
-        connect(Test, &QPushButton::clicked, this, [=]() {
+        if(_GMODE == _GMode::_EvE)
+        {
+            Text = new QLabel("AI is thinking", this);
+            Text->setGeometry(0, 0, 200, 80);
+            Text->setFont(QFont(fontName, 24));
             emit AIWorking();
-            Test->setHidden(true);
-        });
+        }
+        else
+        {
+            Test = new QPushButton("AI First", this);
+            Test->setGeometry(0, 0, 200, 80);
+            Test->setFont(QFont(fontName, 24));
+            connect(Test, &QPushButton::clicked, this, [=]() {
+                emit AIWorking();
+                Test->setHidden(true);
+            });
+        }
     }
 }
 

@@ -17,7 +17,7 @@ public:
         QObject *parent = nullptr
     );
 
-    void AIWork() override;
+    void AIWork1() override;
     bool IsPlayer() override;
     void Determine(HexAttacker _attacker) override;
 
