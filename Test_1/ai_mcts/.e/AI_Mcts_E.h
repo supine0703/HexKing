@@ -1,28 +1,21 @@
 #ifndef AI_MCTS_E_H
 #define AI_MCTS_E_H
 
-#include <QObject>
 #include <QSharedPointer>
-#include "HexMatch.hpp"
+#include "HexAI.h"
 
 class QThreadPool;
 class QElapsedTimer;
 class MctsNode;
 class MctsWork;
 
-class AI_Mcts_E : public QObject
+class AI_Mcts_E : public HexAI
 {
-    Q_OBJECT
 public:
     // exploration constant factor, max decision time, is parallelized
-    AI_Mcts_E(
-        double ecf,
-        int max_decision_time,
-        bool parallelized = false,
-        QObject* parent = nullptr
-    );
-    ~AI_Mcts_E();
-    HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker);
+    AI_Mcts_E(double ecf, int max_decision_time, bool parallelized = false);
+    ~AI_Mcts_E() override;
+    HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) override;
 
 private:
 

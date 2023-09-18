@@ -2,12 +2,14 @@
 #include <QStack>
 #include <QQueue>
 #include "RouteGraph.h"
+#include "qdebug.h"
 
-GameMode::GameMode(bool *end, HexMatch *_match, QVector<HexPoint> *_winner, QObject *parent)
+GameMode::GameMode(bool *end, HexMatch *_match, QVector<HexPoint> *_winner, HexAttacker *_attacker, QObject *parent)
     : QObject(parent)
     , end(end)
     , match(_match)
     , winnerRoute(_winner)
+    , nowAttacker(_attacker)
 {
 }
 
@@ -16,21 +18,32 @@ GameMode::~GameMode()
     end = nullptr;
     match = nullptr;
     winnerRoute = nullptr;
+    nowAttacker = nullptr;
 }
 
-void GameMode::AIWork1()
+void GameMode::AIWork()
 {
 }
 
-void GameMode::AIWork2()
+void GameMode::Determine()
 {
+    if (*end)
+    {
+        return;
+    }
+
+    if (Outcome())
+    {
+        *end = true;
+        return;
+    }
 }
 
 bool GameMode::Outcome()
 {
     Q_ASSERT(end != nullptr && match != nullptr && winnerRoute != nullptr);
     HexMatch &_match = *match;
-    if (!match->WinnerDecided(attacker))
+    if (!match->WinnerDecided(*nowAttacker))
     {
         return false;
     }
@@ -45,9 +58,9 @@ bool GameMode::Outcome()
     QVector<QPair<int, int>> visiting;
     RouteGraph route;
 
-    for (int &p = num[*(!attacker)]; p < order; p++)
+    for (int &p = num[*(!(*nowAttacker))]; p < order; p++)
     {
-        if (_match(r, c) == attacker)
+        if (_match(r, c) == *nowAttacker)
         {
             depth_i++;
             queue.enqueue({{r, c}, route.Push(r, c)});
@@ -71,7 +84,7 @@ bool GameMode::Outcome()
         visiting.push_back({r, c});
 
         // win
-        if (num[*attacker] == order - 1)
+        if (num[**nowAttacker] == order - 1)
         {
             route.PushWinner(r, c, index);
             *end = true;
@@ -120,7 +133,7 @@ bool GameMode::Outcome()
             }
             int _r = r + r_add;
             int _c = c + c_add;
-            if (!visited.contains({_r, _c}) && _match(_r, _c) == attacker)
+            if (!visited.contains({_r, _c}) && _match(_r, _c) == *nowAttacker)
             {
                 queue.enqueue({{_r, _c}, route.PushBack(_r, _c, _i)});
             }

@@ -5,7 +5,6 @@
 #include "HexMatch.hpp"
 
 class QPushButton;
-class QLabel;
 class GameMode;
 class QThread;
 
@@ -27,7 +26,7 @@ public:
 
 private:
     QPushButton *Test;
-    QLabel *Text;
+
     QThread *AIThread;
     HexAttacker attacker = HexAttacker::Black; // black always play first
     bool isPlayer; // 0: Environment, 1: Player

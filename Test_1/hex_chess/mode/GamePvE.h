@@ -3,7 +3,7 @@
 
 #include "GameMode.h"
 
-#include <QThread>
+class HexAI;
 
 class GamePvE : public GameMode
 {
@@ -16,14 +16,14 @@ public:
         bool isWhite,
         QObject *parent = nullptr
     );
+    ~GamePvE() override;
 
-    void AIWork1() override;
+    void AIWork() override;
     bool IsPlayer() override;
-    void Determine(HexAttacker _attacker) override;
 
 private:
     HexAttacker thisAttacker;
-    HexAttacker *nowAttacker;
+    HexAI *AI;
 };
 
 #endif // GAMEPVE_H

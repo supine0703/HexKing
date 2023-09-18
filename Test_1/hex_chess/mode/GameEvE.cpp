@@ -2,63 +2,57 @@
 
 #include <QDebug>
 
-//可修改版本
-#define _VERSION_1 'E'
-#define _VERSION_2 'A'
-
+#define _VERSION_BLACK_ 'A'
+#define _VERSION_WHITE_ 'E'
 #define _ECF_ 1.41
 #define _TIME_ 5
 #define _PARALLELIZED_ true
 
-#if _VERSION_1 == 'A'
+#if _VERSION_BLACK_ == 'A' || _VERSION_WHITE_ == 'A'
 #include "AI_Mcts_A.h"
-#elif _VERSION_1 == 'E'
+#endif
+#if _VERSION_BLACK_ == 'E' || _VERSION_WHITE_ == 'E'
 #include "AI_Mcts_E.h"
 #endif
 
-#if _VERSION_2 == 'A'
-#include "AI_Mcts_A.h"
-#elif _VERSION_2 == 'E'
-#include "AI_Mcts_E.h"
-#endif
-
-GameEvE::GameEvE(
-    bool *end,
-    HexMatch *_match,
+GameEvE::GameEvE(bool *end, HexMatch *_match,
     QVector<HexPoint> *_winner,
-    HexAttacker *_attacker,
-    bool isWhite,
-    QObject *parent)
-    : GameMode::GameMode(end, _match, _winner, parent)
+    HexAttacker *_attacker, QObject *parent)
+    : GameMode::GameMode(end, _match, _winner, _attacker, parent)
     , nowAttacker(_attacker)
-    , thisAttacker(static_cast<HexAttacker>(isWhite))
+#if _VERSION_BLACK_ == 'A'
+    , blackAI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_))
+#elif _VERSION_BLACK_ == 'E'
+    , blackAI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_))
+#endif
+#if _VERSION_WHITE_ == 'A'
+    , whiteAI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_))
+#elif _VERSION_WHITE_ == 'E'
+    , whiteAI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_))
+#endif
 {
 }
 
-void GameEvE::AIWork1()
+GameEvE::~GameEvE()
 {
-#if _VERSION_1 == 'A'
-    qDebug() << "----------AI_Mcts_A is thinking----------" << Qt::endl;
-    AI_Mcts_A *AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_));
-#elif _VERSION_1 == 'E'
-    qDebug() << "----------AI_Mcts_E is thinking----------" << Qt::endl;
-    AI_Mcts_E *AI1(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_, this));
-#endif
-    auto [row, col] = AI1->ChooseMove(*match, *nowAttacker);
-    emit placeChess(row, col);
+    delete blackAI;
+    delete whiteAI;
 }
 
-void GameEvE::AIWork2()
+void GameEvE::AIWork()
 {
-#if _VERSION_2 == 'A'
-    qDebug() << "----------AI_Mcts_A is thinking----------" << Qt::endl;
-    AI_Mcts_A *AI2(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_));
-#elif _VERSION_2 == 'E'
-    qDebug() << "----------AI_Mcts_E is thinking----------" << Qt::endl;
-    AI_Mcts_E *AI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_, this));
-#endif
-    auto [row, col] = AI2->ChooseMove(*match, *nowAttacker);
-    emit placeChess(row, col);
+    if (*(*nowAttacker))
+    {
+        qDebug() << "----------White: " + whiteAI->GetName() + " is thinking----------" << Qt::endl;
+        auto [row, col] = whiteAI->ChooseMove(*match, *nowAttacker);
+        emit placeChess(row, col);
+    }
+    else
+    {
+        qDebug() << "----------Black: " + blackAI->GetName() + " is thinking----------" << Qt::endl;
+        auto [row, col] = blackAI->ChooseMove(*match, *nowAttacker);
+        emit placeChess(row, col);
+    }
 }
 
 bool GameEvE::IsPlayer()
@@ -66,18 +60,3 @@ bool GameEvE::IsPlayer()
     return false;
 }
 
-
-void GameEvE::Determine(HexAttacker _attacker)
-{
-    if (*end)
-    {
-        return;
-    }
-
-    attacker = _attacker;
-    if (Outcome())
-    {
-        *end = true;
-        return;
-    }
-}

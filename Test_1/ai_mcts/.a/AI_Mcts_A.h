@@ -1,7 +1,7 @@
 #ifndef AI_MCTS_A_H
 #define AI_MCTS_A_H
 
-#include "HexMatch.hpp"
+#include "HexAI.h"
 #include <QPair>
 #include <QTime>
 #include <QMutex>
@@ -12,12 +12,13 @@
 
 class MctsNode;
 
-class AI_Mcts_A
+class AI_Mcts_A : public HexAI
 {
 public:
     // exploration constant factor, max decision time, is parallelized
     AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized = false);
-    HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker);
+    ~AI_Mcts_A() { exit = true; };
+    HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) override;
 
 private:
     void ExpandNode(const QSharedPointer<MctsNode>& node, const HexMatch& board);
@@ -55,6 +56,8 @@ private:
     bool parallelized;
     QRandomGenerator random;
     QSharedPointer<MctsNode> root;
+
+    bool exit = false;
 };
 
 #endif // AI_MCTS_A_H

@@ -20,21 +20,24 @@ GamePvE::GamePvE(
     HexAttacker *_attacker,
     bool isWhite,
     QObject *parent)
-    : GameMode::GameMode(end, _match, _winner, parent)
-    , nowAttacker(_attacker)
+    : GameMode::GameMode(end, _match, _winner, _attacker, parent)
     , thisAttacker(static_cast<HexAttacker>(isWhite))
+#if _VERSION_ == 'A'
+    , AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_))
+#elif _VERSION_ == 'E'
+    , AI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_))
+#endif
 {
 }
 
-void GamePvE::AIWork1()
+GamePvE::~GamePvE()
 {
-#if _VERSION_ == 'A'
-    qDebug() << "----------AI_Mcts_A is thinking----------" << Qt::endl;
-    AI_Mcts_A *AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_));
-#elif _VERSION_ == 'E'
-    qDebug() << "----------AI_Mcts_E is thinking----------" << Qt::endl;
-    AI_Mcts_E *AI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_, this));
-#endif
+    delete AI;
+}
+
+void GamePvE::AIWork()
+{
+    qDebug() << "----------" + AI->GetName() + " is thinking----------" << Qt::endl;
     auto [row, col] = AI->ChooseMove(*match, *nowAttacker);
     emit placeChess(row, col);
 }
@@ -44,17 +47,3 @@ bool GamePvE::IsPlayer()
     return *nowAttacker != thisAttacker;
 }
 
-void GamePvE::Determine(HexAttacker _attacker)
-{
-    if (*end)
-    {
-        return;
-    }
-
-    attacker = _attacker;
-    if (Outcome())
-    {
-        *end = true;
-        return;
-    }
-}

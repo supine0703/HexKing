@@ -2,29 +2,28 @@
 #define GAMEEVE_H
 
 #include "GameMode.h"
-#include <QThread>
 
+class HexAI;
 
 class GameEvE : public GameMode
 {
-    Q_OBJECT
 public:
     GameEvE(
         bool *end,
         HexMatch *_match,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
-        bool isWhite,
         QObject *parent = nullptr
-        );
+    );
+    ~GameEvE();
 
-    void AIWork1() override;
-    void AIWork2() override;
+    void AIWork() override;
     bool IsPlayer() override;
-    void Determine(HexAttacker _attacker) override;
 
 private:
-    HexAttacker thisAttacker;
     HexAttacker *nowAttacker;
+    HexAI *blackAI;
+    HexAI *whiteAI;
 };
+
 #endif // GAMEEVE_H

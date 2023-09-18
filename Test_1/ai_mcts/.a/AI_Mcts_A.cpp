@@ -7,7 +7,8 @@
 #include "MctsNode.hpp"
 
 AI_Mcts_A::AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized)
-    : ecf(ecf)
+    : HexAI("AI_Mcts_A")
+    , ecf(ecf)
     , usedTime()
     , endTime(max_decision_time * 1000)
     , parallelized(parallelized)
@@ -55,7 +56,7 @@ void AI_Mcts_A::MtcsSearch(
     const HexMatch &board,
     uint number_of_threads)
 {
-    while (usedTime.elapsed() < endTime)
+    while (!exit && usedTime.elapsed() < endTime)
     {
         // Select a child node for playout using UCT
         QSharedPointer<MctsNode> chosenChild = SelectChildPlayout(root);

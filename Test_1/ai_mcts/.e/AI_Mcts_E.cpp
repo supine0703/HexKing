@@ -7,8 +7,8 @@
 
 #include <QDebug>
 
-AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized, QObject *parent)
-    : QObject(parent)
+AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized)
+    : HexAI("AI_Mcts_E")
     , ecf(ecf)
     , endTime(max_decision_time * 1000)
     , parallelized(parallelized)
@@ -24,6 +24,8 @@ AI_Mcts_E::~AI_Mcts_E()
         pool->waitForDone();
         delete pool;
     }
+//    HexAI::~HexAI();
+//    QObject::~QObject();
 }
 
 HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)

@@ -8,29 +8,31 @@
 class GameMode : public QObject
 {
     Q_OBJECT
-signals:
-    void placeChess(int _row_, int _col_);
-
 protected:
-    bool *end;
-    HexAttacker attacker;
-    HexMatch *match;
-    QVector<HexPoint> *winnerRoute;
-
     GameMode(
         bool *end,
         HexMatch *_match,
         QVector<HexPoint> *_winner,
+        HexAttacker *_attacker,
         QObject *parent = nullptr
     );
-    virtual bool Outcome();
+
+    bool *end;
+    HexMatch *match;
+    QVector<HexPoint> *winnerRoute;
+    HexAttacker *nowAttacker;
 
 public:
     virtual ~GameMode();
-    virtual void AIWork1();
-    virtual void AIWork2();
+    virtual void AIWork();
+    virtual void Determine();
     virtual bool IsPlayer() = 0;
-    virtual void Determine(HexAttacker _attacker) = 0;
+
+private:
+    bool Outcome();
+
+signals:
+    void placeChess(int _row_, int _col_);
 };
 
 #endif // GAMEMODE_H

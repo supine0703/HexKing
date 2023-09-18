@@ -1,20 +1,18 @@
 #include "ChessBoard.h"
 #include "GamePvP.h"
-#include "GameEvE.h"
 #include "GamePvE.h"
-
+#include "GameEvE.h"
 
 #include <QPushButton>
-#include <QLabel>
+
 #include <QPainterPath>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QThread>
 #include <QtMath>
-//#include "Match.hpp"
 
 #define _GMODE _GMode::_EvE
-#define _ORDER 7
+#define _ORDER 8
 #define _RADIO 1
 #define _FIRST 1
 #define _BORDER_RH 0.25
@@ -55,31 +53,24 @@ ChessBoard::ChessBoard(QWidget *parent)
     switch (_GMode(_GMODE))
     {
     case _GMode::_PvP:
-        gameMode = new GamePvP(&isEnd, match, winnerRoute);
+        gameMode = new GamePvP(&isEnd, match, winnerRoute, &attacker);
         break;
     case _GMode::_PvE:
         gameMode = new GamePvE(&isEnd, match, winnerRoute, &attacker, isPlayer);
-        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork1);
+        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             PlaceChessPieces(_row, _col);
         });
         AIThread->start();
         break;
     case _GMode::_EvE:
-        ChessBoard::isPlayer=false;
-        gameMode = new GameEvE(&isEnd, match, winnerRoute, &attacker, isPlayer);
-        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork1);
-        connect(this, &ChessBoard::setPieces, gameMode, &GameMode::AIWork2);
+        gameMode = new GameEvE(&isEnd, match, winnerRoute, &attacker);
+        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             PlaceChessPieces(_row, _col);
         });
-
         AIThread->start();
-//        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork2);
-//        connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
-//            PlaceChessPieces(_row, _col);
-//        });
-//        AIThread->start();
+        isPlayer = false;
         break;
     }
     gameMode->moveToThread(AIThread);
@@ -98,28 +89,23 @@ ChessBoard::ChessBoard(QWidget *parent)
 
     if (!isPlayer)
     {
-        if(_GMODE == _GMode::_EvE)
-        {
-            Text = new QLabel("AI is thinking", this);
-            Text->setGeometry(0, 0, 200, 80);
-            Text->setFont(QFont(fontName, 24));
+        Test = new QPushButton("AI First", this);
+        Test->setGeometry(0, 0, 200, 80);
+        Test->setFont(QFont(fontName, 24));
+        connect(Test, &QPushButton::clicked, this, [=]() {
             emit AIWorking();
-        }
-        else
-        {
-            Test = new QPushButton("AI First", this);
-            Test->setGeometry(0, 0, 200, 80);
-            Test->setFont(QFont(fontName, 24));
-            connect(Test, &QPushButton::clicked, this, [=]() {
-                emit AIWorking();
-                Test->setHidden(true);
-            });
-        }
+            Test->setHidden(true);
+        });
     }
 }
 
 ChessBoard::~ChessBoard()
 {
+    delete gameMode;
+    AIThread->exit();
+    AIThread->wait();
+    delete AIThread;
+
     delete empty;
     delete black;
     delete white;
@@ -135,7 +121,6 @@ ChessBoard::~ChessBoard()
     delete winnerPath;
     
     delete match;
-    delete gameMode;
 }
 
 void ChessBoard::resizeEvent(QResizeEvent *event)
@@ -474,7 +459,7 @@ void ChessBoard::PlaceChessPieces(int row, int col)
 
 void ChessBoard::ConditionsDetermine()
 {
-    gameMode->Determine(attacker);
+    gameMode->Determine();
     if (isEnd)
     {
         qDebug() << "The winer is :" << (*attacker ? "White" : "Black");

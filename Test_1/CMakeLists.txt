@@ -23,6 +23,8 @@ include_directories(ai_mcts/.e)
 set(MODEL_SOURCES
     hex_model/HexMatch.hpp
     hex_model/HexMatch.cpp
+    hex_model/HexAI.h
+    hex_model/HexAI.cpp
 )
 
 set(CHESS_SOURCES
@@ -36,6 +38,8 @@ set(CHESS_SOURCES
     hex_chess/mode/GamePvP.cpp
     hex_chess/mode/GamePvE.h
     hex_chess/mode/GamePvE.cpp
+    hex_chess/mode/GameEvE.h
+    hex_chess/mode/GameEvE.cpp
 
     hex_chess/ChessBoard.h
     hex_chess/ChessBoard.cpp
@@ -64,7 +68,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Test_1
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        hex_chess/mode/GameEvE.h hex_chess/mode/GameEvE.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Test_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
