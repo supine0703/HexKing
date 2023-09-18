@@ -1,9 +1,0 @@
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/Test_1.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/list_install_components.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/install.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/install/local.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/install/strip.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/Test_1_autogen_timestamp_deps.dir
-D:/Project_Hex/HexKing/build-Test_1-Desktop_Qt_6_5_2_MinGW_64_bit-Debug/CMakeFiles/Test_1_autogen.dir
