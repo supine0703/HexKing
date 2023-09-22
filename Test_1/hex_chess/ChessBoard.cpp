@@ -11,8 +11,8 @@
 #include <QThread>
 #include <QtMath>
 
-#define _GMODE _GMode::_EvE
-#define _ORDER 8
+#define _GMODE _GMode::_PvP
+#define _ORDER 7
 #define _RADIO 1
 #define _FIRST 1
 #define _BORDER_RH 0.25
@@ -219,18 +219,18 @@ void ChessBoard::mousePressEvent(QMouseEvent *event)
 {
     if (isPlayer && !isEnd)
     {
-    press_row = mouse_row;
-    press_col = mouse_col;
+        press_row = mouse_row;
+        press_col = mouse_col;
     }
 }
 
 void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (press_row == mouse_row && press_col == mouse_col)
+    if (!isEnd && press_row == mouse_row && press_col == mouse_col)
     {
         if (0 <= press_row && press_row < order && 0 <= press_col && press_col <= order)
         {
-        if (match->GetCell(press_row, press_col) == HexCell::Empty)
+            if (match->GetCell(press_row, press_col) == HexCell::Empty)
             {
                 PlaceChessPieces(press_row, press_col);
             }

@@ -7,14 +7,9 @@ class QString;
 
 class HexAI
 {
-protected:
-    HexAI(const QString& name);
-
-    QString *name;
-
 public:
-    virtual ~HexAI();
-    virtual QString GetName();
+    virtual ~HexAI() { };
+    virtual QString Name() = 0;
     virtual HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) = 0;
 };
 

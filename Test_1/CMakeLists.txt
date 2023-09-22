@@ -13,17 +13,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-include_directories(hex_model)
-include_directories(hex_chess)
-include_directories(hex_chess/mode)
-include_directories(ai_mcts)
-include_directories(ai_mcts/.a)
-include_directories(ai_mcts/.e)
+include_directories(
+    hex_model
+    hex_chess
+    hex_chess/mode
+)
+
+include_directories(
+    ai_mcts
+    ai_mcts/.a
+    ai_mcts/.e
+    ai_mcts/.g
+)
 
 set(MODEL_SOURCES
     hex_model/HexMatch.hpp
     hex_model/HexMatch.cpp
-    hex_model/HexAI.h
+    hex_model/HexAI.hpp
     hex_model/HexAI.cpp
 )
 
@@ -51,10 +57,14 @@ set(AI_MCTS_SOURCES
     ai_mcts/.a/AI_Mcts_A.h
     ai_mcts/.a/AI_Mcts_A.cpp
 
-    ai_mcts/.e/MctsWork.h
-    ai_mcts/.e/MctsWork.cpp
+    ai_mcts/MctsWork.h
+    ai_mcts/MctsWork.cpp
+
     ai_mcts/.e/AI_Mcts_E.h
     ai_mcts/.e/AI_Mcts_E.cpp
+
+    ai_mcts/.g/AI_Mcts_G.h
+    ai_mcts/.g/AI_Mcts_G.cpp
 )
 
 set(PROJECT_SOURCES

@@ -1,5 +1,5 @@
-#ifndef AI_MCTS_E_H
-#define AI_MCTS_E_H
+#ifndef AI_MCTS_G_H
+#define AI_MCTS_G_H
 
 #include <QSharedPointer>
 #include "HexAI.hpp"
@@ -9,13 +9,13 @@ class QElapsedTimer;
 class MctsNode;
 class MctsWork;
 
-class AI_Mcts_E : public HexAI
+class AI_Mcts_G : public HexAI
 {
 public:
     // exploration constant factor, max decision time, is parallelized
-    AI_Mcts_E(double ecf, int max_decision_time, bool parallelized = false);
-    ~AI_Mcts_E() override;
-    QString Name() override { return "AI_Mcts_E"; }
+    AI_Mcts_G(double ecf, int max_decision_time, bool parallelized = false);
+    ~AI_Mcts_G() override;
+    QString Name() override { return "AI_Mcts_G"; }
     HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) override;
 
 private:
@@ -38,6 +38,7 @@ private:
     QThreadPool *pool;
 
     bool exit = false;
+    short stepNum = 0;
 };
 
-#endif // AI_MCTS_E_H
+#endif // AI_MCTS_G_H

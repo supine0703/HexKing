@@ -1,7 +1,7 @@
 #ifndef AI_MCTS_A_H
 #define AI_MCTS_A_H
 
-#include "HexAI.h"
+#include "HexAI.hpp"
 #include <QPair>
 #include <QTime>
 #include <QMutex>
@@ -18,6 +18,7 @@ public:
     // exploration constant factor, max decision time, is parallelized
     AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized = false);
     ~AI_Mcts_A() { exit = true; };
+    QString Name() override { return "AI_Mcts_A"; }
     HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) override;
 
 private:

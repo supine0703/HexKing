@@ -11,6 +11,8 @@
 #include "AI_Mcts_A.h"
 #elif _VERSION_ == 'E'
 #include "AI_Mcts_E.h"
+#elif _VERSION_ == 'G'
+#include "AI_Mcts_G.h"
 #endif
 
 GamePvE::GamePvE(
@@ -26,6 +28,8 @@ GamePvE::GamePvE(
     , AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_))
 #elif _VERSION_ == 'E'
     , AI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_))
+#elif _VERSION_ == 'G'
+    , AI(new AI_Mcts_G(_ECF_, _TIME_, _PARALLELIZED_))
 #endif
 {
 }
@@ -37,7 +41,7 @@ GamePvE::~GamePvE()
 
 void GamePvE::AIWork()
 {
-    qDebug() << "----------" + AI->GetName() + " is thinking----------" << Qt::endl;
+    qDebug() << "----------" + AI->Name() + " is thinking----------" << Qt::endl;
     auto [row, col] = AI->ChooseMove(*match, *nowAttacker);
     emit placeChess(row, col);
 }

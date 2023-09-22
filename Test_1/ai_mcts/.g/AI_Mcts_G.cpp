@@ -1,4 +1,4 @@
-#include "AI_Mcts_E.h"
+#include "AI_Mcts_G.h"
 
 #include <QEventLoop>
 #include <QThreadPool>
@@ -7,7 +7,7 @@
 
 #include <QDebug>
 
-AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized)
+AI_Mcts_G::AI_Mcts_G(double ecf, int max_decision_time, bool parallelized)
     : HexAI()
     , ecf(ecf)
     , endTime(max_decision_time * 1000)
@@ -16,7 +16,7 @@ AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized)
 {
 }
 
-AI_Mcts_E::~AI_Mcts_E()
+AI_Mcts_G::~AI_Mcts_G()
 {
     if (parallelized)
     {
@@ -24,12 +24,15 @@ AI_Mcts_E::~AI_Mcts_E()
         pool->waitForDone();
         delete pool;
     }
-//    HexAI::~HexAI();
-//    QObject::~QObject();
 }
 
-HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
+HexPoint AI_Mcts_G::ChooseMove(const HexMatch &board, HexAttacker attacker)
 {
+    if (!stepNum++)
+    {
+        int set = board.GetOrder() / 2;
+        return HexPoint(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
+    }
     // Create a new root node for MCTS
     root = QSharedPointer<MctsNode>(new MctsNode(attacker, {-1, -1}, nullptr));
     // Expand root based on the current game state
@@ -44,7 +47,8 @@ HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
     QSharedPointer<MctsNode> bestChild = BestChild();
     qDebug() << bestChild->GetWinsNum() << bestChild->GetVisitedNum()
              << "| total:" << root->GetVisitedNum()
-             << "| time:" << usedTime->elapsed() << Qt::endl;
+             << "| time:" << usedTime->elapsed()
+             << "| step:" << stepNum << Qt::endl;
     HexPoint bestMove = bestChild->GetMove();
     root = nullptr;
     delete usedTime;
@@ -52,7 +56,7 @@ HexPoint AI_Mcts_E::ChooseMove(const HexMatch &board, HexAttacker attacker)
     return bestMove;
 }
 
-void AI_Mcts_E::ExpandNode(const HexMatch &board)
+void AI_Mcts_G::ExpandNode(const HexMatch &board)
 {
     QVector<HexPoint> validMoves = GetValidMoves(board);
     for (const auto& move : validMoves)
@@ -63,7 +67,7 @@ void AI_Mcts_E::ExpandNode(const HexMatch &board)
     }
 }
 
-void AI_Mcts_E::MctsSearch(int &itCounter, const HexMatch &board)
+void AI_Mcts_G::MctsSearch(int &itCounter, const HexMatch &board)
 {
     if (parallelized)
     {
@@ -97,7 +101,7 @@ void AI_Mcts_E::MctsSearch(int &itCounter, const HexMatch &board)
     }
 }
 
-QSharedPointer<MctsNode> AI_Mcts_E::SelectChildPlayout()
+QSharedPointer<MctsNode> AI_Mcts_G::SelectChildPlayout()
 {
     //Initialize best_child as the first child and calculate its UCT score
     QSharedPointer<MctsNode> bestChild = root->children[0];
@@ -116,7 +120,7 @@ QSharedPointer<MctsNode> AI_Mcts_E::SelectChildPlayout()
     return bestChild;
 }
 
-double AI_Mcts_E::UCTScore(const QSharedPointer<MctsNode> &child)
+double AI_Mcts_G::UCTScore(const QSharedPointer<MctsNode> &child)
 {
     // If any child node has not been visited yet, return a high value to
     // encourage exploration
@@ -133,16 +137,27 @@ double AI_Mcts_E::UCTScore(const QSharedPointer<MctsNode> &child)
     }
 }
 
-QSharedPointer<MctsNode> AI_Mcts_E::BestChild()
+QSharedPointer<MctsNode> AI_Mcts_G::BestChild()
 {
-    double maxWinRatio = -1;
     QSharedPointer<MctsNode> bestChild;
+//    double maxWinRatio = -1;
+//    for (const auto& child : root->children)
+//    {
+//        double winRatio = static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum();
+//        if (winRatio > maxWinRatio)
+//        {
+//            maxWinRatio = winRatio;
+//            bestChild = child;
+//        }
+//    }
+
+    int maxVisit = 0;
     for (const auto& child : root->children)
     {
-        double winRatio = static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum();
-        if (winRatio > maxWinRatio)
+        int visits = child->GetVisitedNum();
+        if (visits > maxVisit)
         {
-            maxWinRatio = winRatio;
+            maxVisit = visits;
             bestChild = child;
         }
     }

@@ -7,7 +7,7 @@
 #include "MctsNode.hpp"
 
 AI_Mcts_A::AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized)
-    : HexAI("AI_Mcts_A")
+    : HexAI()
     , ecf(ecf)
     , usedTime()
     , endTime(max_decision_time * 1000)
