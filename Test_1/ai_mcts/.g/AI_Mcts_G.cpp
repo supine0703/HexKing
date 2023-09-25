@@ -1,13 +1,12 @@
 #include "AI_Mcts_G.h"
 
-#include <QEventLoop>
 #include <QThreadPool>
 #include <QElapsedTimer>
-#include "MctsWork.h"
+#include "MctsWork_G.h"
 
 #include <QDebug>
 
-AI_Mcts_G::AI_Mcts_G(double ecf, int max_decision_time, bool parallelized)
+AI_Mcts_G::AI_Mcts_G(double ecf, uint max_decision_time, bool parallelized)
     : HexAI()
     , ecf(ecf)
     , endTime(max_decision_time * 1000)
@@ -20,54 +19,44 @@ AI_Mcts_G::~AI_Mcts_G()
 {
     if (parallelized)
     {
-        exit = true;
+        endTime = 0;
         pool->waitForDone();
         delete pool;
     }
 }
 
-HexPoint AI_Mcts_G::ChooseMove(const HexMatch &board, HexAttacker attacker)
+HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
 {
-    if (!stepNum++)
+    if (board.PiecesNum() < 2)
     {
-        int set = board.GetOrder() / 2;
+        int set = board.Order() / 2;
         return HexPoint(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
     }
     // Create a new root node for MCTS
-    root = QSharedPointer<MctsNode>(new MctsNode(attacker, {-1, -1}, nullptr));
-    // Expand root based on the current game state
-    ExpandNode(board);
-    int mcts_itCounter = 0;
     usedTime = new QElapsedTimer();
     usedTime->start();
+    root.reset(new MctsNode(attacker, {-1, -1}, board.EmptyNum(), nullptr));
+
     // Run MCTS until the timer runs out to update root's and its children's
     // statistics
-    MctsSearch(mcts_itCounter, board);
+    MctsSearch(board);
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
-    qDebug() << bestChild->GetWinsNum() << bestChild->GetVisitedNum()
-             << "| total:" << root->GetVisitedNum()
+    qDebug() << bestChild->WinsNum() << bestChild->VisitsNum()
+             << "| total:" << root->VisitsNum()
              << "| time:" << usedTime->elapsed()
-             << "| step:" << stepNum << Qt::endl;
-    HexPoint bestMove = bestChild->GetMove();
-    root = nullptr;
+             << "| step:" << ((board.PiecesNum() + 1) >> 1)
+             << Qt::endl;
+    HexPoint bestMove = bestChild->Move();
+
+    root.clear();
     delete usedTime;
     usedTime = nullptr;
+
     return bestMove;
 }
 
-void AI_Mcts_G::ExpandNode(const HexMatch &board)
-{
-    QVector<HexPoint> validMoves = GetValidMoves(board);
-    for (const auto& move : validMoves)
-    {
-        root->children.push_back(
-            QSharedPointer<MctsNode>(new MctsNode(root->GetAttacker(), move, root))
-        );
-    }
-}
-
-void AI_Mcts_G::MctsSearch(int &itCounter, const HexMatch &board)
+void AI_Mcts_G::MctsSearch(const HexBoard &board)
 {
     if (parallelized)
     {
@@ -76,91 +65,46 @@ void AI_Mcts_G::MctsSearch(int &itCounter, const HexMatch &board)
          * @bug I don't know why the cells (QVector member of MctsWork) will overflow.
          * This happens if the board (local variable) is not copied.
          * @resolve I guess the problem may come from QVector beacuse the bug didn't
-         * reappear after I replaced QVector with a self-defined array.
+         * reappear after I replaced QVector with a self-defined array. --2023.9.17
          */
-//        HexMatch boardCopy(board);
-        while (!exit && usedTime->elapsed() < endTime)
-        {
-//            MctsWork *work = new MctsWork(SelectChildPlayout(), boardCopy);
-            MctsWork *work = new MctsWork(SelectChildPlayout(), board);
-            if (!pool->tryStart(work))
-            {
-                delete work;
-            }
-        }
+        MctsWork_G *work;
+        while(pool->tryStart(work = new MctsWork_G(root, board, *usedTime, endTime, ecf)));
+        delete work;
+        work = nullptr;
         pool->waitForDone();
     }
     else
     {
-        while (usedTime->elapsed() < endTime)
-        {
-            QSharedPointer<MctsNode> chosenChild = SelectChildPlayout();
-            MctsWork(chosenChild, board).run();
-            itCounter++;
-        }
-    }
-}
-
-QSharedPointer<MctsNode> AI_Mcts_G::SelectChildPlayout()
-{
-    //Initialize best_child as the first child and calculate its UCT score
-    QSharedPointer<MctsNode> bestChild = root->children[0];
-    double maxScore = UCTScore(bestChild);
-    // Iterate over the remaining child nodes to find the one with the highest UCT score
-    for (int i = 1, end = root->children.count(); i < end; i++)
-    {
-        const auto& child = root->children[i];
-        double uctScore = UCTScore(child);
-        if (uctScore > maxScore)
-        {
-            maxScore = uctScore;
-            bestChild = child;
-        }
-    }
-    return bestChild;
-}
-
-double AI_Mcts_G::UCTScore(const QSharedPointer<MctsNode> &child)
-{
-    // If any child node has not been visited yet, return a high value to
-    // encourage exploration
-    if (child->GetVisitedNum() == 0)
-    {
-        return qInf(); // double max
-    }
-    else
-    {
-        // Otherwise, calculate the UCT score using the UCT formula.
-        return static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum()
-            + ecf * qSqrt(qLn(root->GetVisitedNum()) / child->GetVisitedNum()
-        );
+        MctsWork_G(root, board, *usedTime, endTime, ecf).run();
     }
 }
 
 QSharedPointer<MctsNode> AI_Mcts_G::BestChild()
 {
     QSharedPointer<MctsNode> bestChild;
-//    double maxWinRatio = -1;
-//    for (const auto& child : root->children)
-//    {
-//        double winRatio = static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum();
-//        if (winRatio > maxWinRatio)
-//        {
-//            maxWinRatio = winRatio;
-//            bestChild = child;
-//        }
-//    }
 
-    int maxVisit = 0;
-    for (const auto& child : root->children)
+    double maxWinRatio = 0;
+    for (int i = 0; i < root->ExpandedNum(); i++)
     {
-        int visits = child->GetVisitedNum();
-        if (visits > maxVisit)
+        double winRatio =
+            static_cast<double>(root->Child(i)->WinsNum()) / root->Child(i)->VisitsNum();
+        if (winRatio > maxWinRatio)
         {
-            maxVisit = visits;
-            bestChild = child;
+            maxWinRatio = winRatio;
+            bestChild = root->Child(i);
         }
     }
+
+//    int maxVisit = 0;
+//    for (int i = 0; i < root->ExpandedNum(); i++)
+//    {
+//        int visits = root->Child(i)->VisitsNum();
+//        if (visits > maxVisit)
+//        {
+//            maxVisit = visits;
+//            bestChild = root->Child(i);
+//        }
+//    }
     Q_ASSERT(bestChild);
     return bestChild;
 }

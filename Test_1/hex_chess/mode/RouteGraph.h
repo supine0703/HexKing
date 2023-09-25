@@ -2,7 +2,7 @@
 #define ROUTEGRAPH_H
 
 #include <QVector>
-#include "HexMatch.hpp"
+#include "HexPoint.hpp"
 #include "RouteNode.hpp"
 
 class RouteGraph

@@ -1,9 +1,10 @@
-#ifndef GAMEMODE_H
-#define GAMEMODE_H
+#ifndef GAMEPATTERN_H
+#define GAMEPATTERN_H
 
 #include <QObject>
 #include <QVector>
-#include "HexMatch.hpp"
+#include "HexBoard.hpp"
+#include "HexPoint.hpp"
 
 class GameMode : public QObject
 {
@@ -11,14 +12,14 @@ class GameMode : public QObject
 protected:
     GameMode(
         bool *end,
-        HexMatch *_match,
+        HexBoard *_board,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr
     );
 
     bool *end;
-    HexMatch *match;
+    HexBoard *board;
     QVector<HexPoint> *winnerRoute;
     HexAttacker *nowAttacker;
 
@@ -35,4 +36,4 @@ signals:
     void placeChess(int _row_, int _col_);
 };
 
-#endif // GAMEMODE_H
+#endif // GAMEPATTERN_H

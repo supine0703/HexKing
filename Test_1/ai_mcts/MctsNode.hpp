@@ -3,7 +3,8 @@
 
 #include <QVector>
 #include <QSharedPointer>
-#include "HexMatch.hpp"
+#include "HexPoint.hpp"
+#include "HexCell.hpp"
 
 class MctsNode
 {
@@ -11,74 +12,107 @@ class MctsNode
     MctsNode& operator=(MctsNode&) = delete;
 public:
     MctsNode(
-        const HexAttacker &attacker, 
-        const HexPoint &move, 
-        const QSharedPointer<MctsNode> &parent = nullptr
+        const HexAttacker& attacker,
+        const HexPoint& move,
+        const uint16_t& childrenTotal,
+        const QSharedPointer<MctsNode>& parent = nullptr
     );
 
-    HexAttacker GetAttacker() const;
-    HexPoint GetMove() const;
-    QSharedPointer<MctsNode> GetParent() const;
-    int GetWinsNum() const;
-    int GetVisitedNum() const;
+    HexAttacker Attacker() const;
+    HexPoint Move() const;
+    QSharedPointer<MctsNode> Parent() const;
+    int WinsNum() const;
+    int VisitsNum() const;
+    int ExpandedNum() const;
+    int ChildrenTotal() const;
     void Win();
     void Visit();
 
-    QVector<QSharedPointer<MctsNode>> children;
+    void Expand(MctsNode* child);
+    QSharedPointer<MctsNode> Child(const int& index);
 
 private:
     const HexAttacker attacker;
     const HexPoint move;
+    const uint16_t childrenTotal;
     const QSharedPointer<MctsNode> parent;
-    QAtomicInt winsNum; // number of wins
-    QAtomicInt visitedNum; // number of visited
+    QAtomicInteger<uint32_t> winsNum; // number of wins
+    QAtomicInteger<uint32_t> visitsNum; // number of visits
+    QAtomicInteger<uint16_t> expandedNum; // number of expanded child
+    QVector<QSharedPointer<MctsNode>> children;
 };
 
 inline MctsNode::MctsNode(
-    const HexAttacker &attacker,
-    const HexPoint &move,
-    const QSharedPointer<MctsNode> &parent)
-    : winsNum(0)
-    , visitedNum(0)
-    , attacker(attacker)
+    const HexAttacker& attacker,
+    const HexPoint& move,
+    const uint16_t& childrenTotal,
+    const QSharedPointer<MctsNode>& parent)
+    : attacker(attacker)
     , move(move)
+    , childrenTotal(childrenTotal)
     , parent(parent)
+    , winsNum(0)
+    , visitsNum(0)
+    , expandedNum(0)
+    , children(childrenTotal)
 {
 }
 
-inline HexAttacker MctsNode::GetAttacker() const
+inline HexAttacker MctsNode::Attacker() const
 {
     return attacker;
 }
 
-inline HexPoint MctsNode::GetMove() const
+inline HexPoint MctsNode::Move() const
 {
     return move;
 }
 
-inline QSharedPointer<MctsNode> MctsNode::GetParent() const
+inline QSharedPointer<MctsNode> MctsNode::Parent() const
 {
     return parent;
 }
 
-inline int MctsNode::GetWinsNum() const
+inline int MctsNode::WinsNum() const
 {
     return winsNum;
 }
 
-inline int MctsNode::GetVisitedNum() const
+inline int MctsNode::VisitsNum() const
 {
-    return visitedNum;
+    return visitsNum;
+}
+
+inline int MctsNode::ExpandedNum() const
+{
+    return expandedNum;
+}
+
+inline int MctsNode::ChildrenTotal() const
+{
+    return childrenTotal;
 }
 
 inline void MctsNode::Win()
 {
-    winsNum++;
+    ++winsNum;
 }
 
 inline void MctsNode::Visit()
 {
-    visitedNum++;
+    ++visitsNum;
+}
+
+inline void MctsNode::Expand(MctsNode *child)
+{
+    children[expandedNum].reset(child);
+    ++expandedNum;
+}
+
+inline QSharedPointer<MctsNode> MctsNode::Child(const int &index)
+{
+    Q_ASSERT(index < expandedNum);
+    return children[index];
 }
 
 #endif // MCTSNODE_H

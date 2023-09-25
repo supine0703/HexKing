@@ -18,15 +18,14 @@ public:
     // exploration constant factor, max decision time, is parallelized
     AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized = false);
     ~AI_Mcts_A() { exit = true; };
-    QString Name() override { return "AI_Mcts_A"; }
-    HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) override;
+    std::string Name() const override { return "AI_Mcts_A"; }
+    HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) override;
 
 private:
-    void ExpandNode(const QSharedPointer<MctsNode>& node, const HexMatch& board);
+    void ExpandNode(const QSharedPointer<MctsNode>& node, const HexBoard& board);
 
-    void MtcsSearch(
-        int& itCounter,
-        const HexMatch& board,
+    void MtcsSearch(int& itCounter,
+        const HexBoard &board,
         uint number_of_threads
     );
 
@@ -37,11 +36,11 @@ private:
         const QSharedPointer<MctsNode>& parent
     );
 
-    HexAttacker SimulatePlayout(const QSharedPointer<MctsNode>& node, HexMatch board);
+    HexAttacker SimulatePlayout(const QSharedPointer<MctsNode>& node, HexBoard board);
 
     QVector<HexAttacker> ParallelPlayout(
         QSharedPointer<MctsNode> node,
-        const HexMatch& board,
+        const HexBoard& board,
         uint number_of_threads
     );
 
@@ -49,7 +48,7 @@ private:
 
     QSharedPointer<MctsNode> BestChild();
 
-    QVector<HexPoint> GetValidMoves(const HexMatch& board);
+    QVector<HexPoint> GetValidMoves(const HexBoard& board);
 
     double ecf;
     QElapsedTimer usedTime;

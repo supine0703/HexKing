@@ -1,11 +1,11 @@
 #include "GamePvP.h"
 
 GamePvP::GamePvP(bool *end,
-    HexMatch *_match,
+    HexBoard *_board,
     QVector<HexPoint> *_winner,
     HexAttacker *_attacker,
     QObject *parent)
-    : GameMode::GameMode(end, _match, _winner, _attacker, parent)
+    : GameMode::GameMode(end, _board, _winner, _attacker, parent)
 {
 }
 

@@ -10,7 +10,7 @@ class GamePvE : public GameMode
 public:
     GamePvE(
         bool *end,
-        HexMatch *_match,
+        HexBoard *_board,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
         bool isWhite,

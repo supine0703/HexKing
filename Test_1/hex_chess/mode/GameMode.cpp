@@ -2,12 +2,11 @@
 #include <QStack>
 #include <QQueue>
 #include "RouteGraph.h"
-#include "qdebug.h"
 
-GameMode::GameMode(bool *end, HexMatch *_match, QVector<HexPoint> *_winner, HexAttacker *_attacker, QObject *parent)
+GameMode::GameMode(bool *end, HexBoard *_board, QVector<HexPoint> *_winner, HexAttacker *_attacker, QObject *parent)
     : QObject(parent)
     , end(end)
-    , match(_match)
+    , board(_board)
     , winnerRoute(_winner)
     , nowAttacker(_attacker)
 {
@@ -16,7 +15,7 @@ GameMode::GameMode(bool *end, HexMatch *_match, QVector<HexPoint> *_winner, HexA
 GameMode::~GameMode()
 {
     end = nullptr;
-    match = nullptr;
+    board = nullptr;
     winnerRoute = nullptr;
     nowAttacker = nullptr;
 }
@@ -41,13 +40,13 @@ void GameMode::Determine()
 
 bool GameMode::Outcome()
 {
-    Q_ASSERT(end != nullptr && match != nullptr && winnerRoute != nullptr);
-    HexMatch &_match = *match;
-    if (!match->WinnerDecided(*nowAttacker))
+    Q_ASSERT(end != nullptr && board != nullptr && winnerRoute != nullptr);
+    HexBoard &_board = *board;
+    int order = _board.Order();
+    if (_board.PiecesNum() <= (order - 1) << 1)
     {
         return false;
     }
-    int order = _match.GetOrder();
     int num[2] { 0, 0 };
     int &r = num[0];
     int &c = num[1];
@@ -60,7 +59,7 @@ bool GameMode::Outcome()
 
     for (int &p = num[*(!(*nowAttacker))]; p < order; p++)
     {
-        if (_match(r, c) == *nowAttacker)
+        if (_board(r, c) == *nowAttacker)
         {
             depth_i++;
             queue.enqueue({{r, c}, route.Push(r, c)});
@@ -133,7 +132,7 @@ bool GameMode::Outcome()
             }
             int _r = r + r_add;
             int _c = c + c_add;
-            if (!visited.contains({_r, _c}) && _match(_r, _c) == *nowAttacker)
+            if (!visited.contains({_r, _c}) && _board(_r, _c) == *nowAttacker)
             {
                 queue.enqueue({{_r, _c}, route.PushBack(_r, _c, _i)});
             }
