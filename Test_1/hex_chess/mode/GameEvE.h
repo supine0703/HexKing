@@ -8,9 +8,8 @@ class HexAI;
 class GameEvE : public GameMode
 {
 public:
-    GameEvE(
-        bool *end,
-        HexMatch *_match,
+    GameEvE(bool *end,
+        HexBoard *_board,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr

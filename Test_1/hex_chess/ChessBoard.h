@@ -2,7 +2,8 @@
 #define CHESSBOARD_H
 
 #include <QWidget>
-#include "HexMatch.hpp"
+#include "HexPoint.hpp"
+#include "HexBoard.hpp"
 
 class QPushButton;
 class GameMode;
@@ -81,7 +82,7 @@ private:
     QPainterPath *gridPath;
     QPainterPath *winnerPath;
 
-    HexMatch *match;
+    HexBoard *board;
     GameMode *gameMode;
 
     void UpdatePoints();

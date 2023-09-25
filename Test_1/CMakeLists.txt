@@ -27,10 +27,16 @@ include_directories(
 )
 
 set(MODEL_SOURCES
-    hex_model/HexMatch.hpp
-    hex_model/HexMatch.cpp
     hex_model/HexAI.hpp
     hex_model/HexAI.cpp
+
+    hex_model/HexIterator.hpp
+    hex_model/HexArrayT.hpp
+    hex_model/HexCell.hpp
+    hex_model/HexPoint.hpp
+    hex_model/HexCellArray.hpp
+    hex_model/HexBoard.hpp
+    hex_model/HexBoard.cpp
 )
 
 set(CHESS_SOURCES
@@ -57,12 +63,14 @@ set(AI_MCTS_SOURCES
     ai_mcts/.a/AI_Mcts_A.h
     ai_mcts/.a/AI_Mcts_A.cpp
 
-    ai_mcts/MctsWork.h
-    ai_mcts/MctsWork.cpp
 
+    ai_mcts/.e/MctsWork_E.h
+    ai_mcts/.e/MctsWork_E.cpp
     ai_mcts/.e/AI_Mcts_E.h
     ai_mcts/.e/AI_Mcts_E.cpp
 
+    ai_mcts/.g/MctsWork_G.h
+    ai_mcts/.g/MctsWork_G.cpp
     ai_mcts/.g/AI_Mcts_G.h
     ai_mcts/.g/AI_Mcts_G.cpp
 )

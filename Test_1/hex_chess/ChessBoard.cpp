@@ -11,8 +11,18 @@
 #include <QThread>
 #include <QtMath>
 
+#define _BLACK_ QColor(0, 0, 0, 255)
+#define _WHITE_ QColor(255, 255, 255, 255)
+#define _RED_ QColor(234, 67, 53, 255)
+#define _BLUE_ QColor(66, 133, 244, 255)
+#define _GRAY_ QColor(191, 191, 191, 255)
+#define _YELLOW_ QColor(255, 225, 135, 255)
+
+#define _RED_T_ QColor(234, 67, 53, 127)
+#define _BLUE_T_ QColor(66, 133, 244, 127)
+
 #define _GMODE _GMode::_PvP
-#define _ORDER 7
+#define _ORDER 11
 #define _RADIO 1
 #define _FIRST 1
 #define _BORDER_RH 0.25
@@ -38,7 +48,7 @@ ChessBoard::ChessBoard(QWidget *parent)
     , black_t(new QBrush(_RED_T_, Qt::SolidPattern))
     , white_t(new QBrush(_BLUE_T_, Qt::SolidPattern))
     , fontName(_FONT_NAME)
-    , match(new HexMatch(order))
+    , board(new HexBoard(order))
     , points(new QVector<QVector<QPointF>>(pointsRows, QVector<QPointF>(pointsCols)))
     , coordPoints(new QVector<QPointF>(order<<1))
     , winnerRoute(new QVector<HexPoint>)
@@ -53,10 +63,10 @@ ChessBoard::ChessBoard(QWidget *parent)
     switch (_GMode(_GMODE))
     {
     case _GMode::_PvP:
-        gameMode = new GamePvP(&isEnd, match, winnerRoute, &attacker);
+        gameMode = new GamePvP(&isEnd, board, winnerRoute, &attacker);
         break;
     case _GMode::_PvE:
-        gameMode = new GamePvE(&isEnd, match, winnerRoute, &attacker, isPlayer);
+        gameMode = new GamePvE(&isEnd, board, winnerRoute, &attacker, isPlayer);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             PlaceChessPieces(_row, _col);
@@ -64,7 +74,7 @@ ChessBoard::ChessBoard(QWidget *parent)
         AIThread->start();
         break;
     case _GMode::_EvE:
-        gameMode = new GameEvE(&isEnd, match, winnerRoute, &attacker);
+        gameMode = new GameEvE(&isEnd, board, winnerRoute, &attacker);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             PlaceChessPieces(_row, _col);
@@ -120,7 +130,7 @@ ChessBoard::~ChessBoard()
     delete gridPath;
     delete winnerPath;
     
-    delete match;
+    delete board;
 }
 
 void ChessBoard::resizeEvent(QResizeEvent *event)
@@ -230,7 +240,7 @@ void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
     {
         if (0 <= press_row && press_row < order && 0 <= press_col && press_col <= order)
         {
-            if (match->GetCell(press_row, press_col) == HexCell::Empty)
+            if (board->GetCell(press_row, press_col) == HexCell::Empty)
             {
                 PlaceChessPieces(press_row, press_col);
             }
@@ -391,9 +401,9 @@ void ChessBoard::PaintPiecesPlaced()
         QPointF centre = ((*points)[i][1] + (*points)[i+1][2]) / 2;
         for (int j = 0; j < order; j++)
         {
-            if (match->GetCell(i, j) != HexCell::Empty)
+            if (board->GetCell(i, j) != HexCell::Empty)
             {
-                painter.setBrush(*_c[static_cast<int>(match->GetCell(i, j))]);
+                painter.setBrush(*_c[static_cast<int>(board->GetCell(i, j))]);
 //                painter.setBrush((*pieces)[i][j] != _Piece::First ? *second : *first);
                 painter.drawEllipse(centre + add * j, radius_solid, radius_solid);
             }
@@ -407,7 +417,7 @@ void ChessBoard::PaintProjection()
 {
     int _row = mouse_row;
     int _col = mouse_col;
-    if (_row != -1 && match->GetCell(_row, _col) == HexCell::Empty)
+    if (_row != -1 && board->GetCell(_row, _col) == HexCell::Empty)
     {
         _col <<= 1;
         QPainter painter(this);
@@ -444,8 +454,8 @@ void ChessBoard::PaintOtherComponents()
 void ChessBoard::PlaceChessPieces(int row, int col)
 {
     Q_ASSERT((0 <= row && row < order && 0 <= col && col <= order));
-    Q_ASSERT(match->GetCell(row, col) == HexCell::Empty);
-    match->GetCell(row, col) = static_cast<HexCell>(attacker);
+    Q_ASSERT(board->GetCell(row, col) == HexCell::Empty);
+    board->Placed(row, col, attacker);
     emit setPieces(row, col);
     qDebug() << (*attacker ? "White:" : "Black:")
         << "(" << row << "," << col << ")" << Qt::endl;
@@ -470,5 +480,4 @@ void ChessBoard::ConditionsDetermine()
     isPlayer = gameMode->IsPlayer();
 
 }
-
 

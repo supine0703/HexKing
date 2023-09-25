@@ -15,10 +15,10 @@ AI_Mcts_A::AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized)
 {
 }
 
-HexPoint AI_Mcts_A::ChooseMove(const HexMatch &board, HexAttacker attacker)
+HexPoint AI_Mcts_A::ChooseMove(const HexBoard &board, HexAttacker attacker)
 {
     // Create a new root node for MCTS
-    root = QSharedPointer<MctsNode>(new MctsNode(attacker, qMakePair(-1, -1), nullptr));
+    root = QSharedPointer<MctsNode>(new MctsNode(attacker, qMakePair(-1, -1), board.EmptyNum()));
     // Prepare for potential parallelism
     uint number_of_threads = 1;
     if (parallelized) {
@@ -34,26 +34,24 @@ HexPoint AI_Mcts_A::ChooseMove(const HexMatch &board, HexAttacker attacker)
     MtcsSearch(mcts_itCounter, board, number_of_threads);
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
-    qDebug() << bestChild->GetWinsNum() << bestChild->GetVisitedNum()
-             << "| total:" << root->GetVisitedNum()
+    qDebug() << bestChild->WinsNum() << bestChild->VisitsNum()
+             << "| total:" << root->VisitsNum()
              << "| time:" << usedTime.elapsed() << Qt::endl;
-    return bestChild->GetMove();
+    return bestChild->Move();
 }
 
-void AI_Mcts_A::ExpandNode(const QSharedPointer<MctsNode> &node, const HexMatch &board)
+void AI_Mcts_A::ExpandNode(const QSharedPointer<MctsNode> &node, const HexBoard &board)
 {
     QVector<HexPoint> validMoves = GetValidMoves(board);
     for (const auto& move : validMoves)
     {
-        node->children.push_back(
-            QSharedPointer<MctsNode>(new MctsNode(node->GetAttacker(), move, node))
-        );
+        root->Expand(new MctsNode(root->Attacker(), move, board.EmptyNum(),root));
     }
 }
 
 void AI_Mcts_A::MtcsSearch(
     int &itCounter,
-    const HexMatch &board,
+    const HexBoard &board,
     uint number_of_threads)
 {
     while (!exit && usedTime.elapsed() < endTime)
@@ -85,12 +83,12 @@ QSharedPointer<MctsNode> AI_Mcts_A::SelectChildPlayout(
     const QSharedPointer<MctsNode> &parent)
 {
     // Initialize best_child as the first child and calculate its UCT score
-    QSharedPointer<MctsNode> best_child = parent->children[0];
+    QSharedPointer<MctsNode> best_child = parent->Child(0);
     double max_score = UCTScore(best_child, parent);
     // Iterate over the remaining child nodes to find the one with the highest UCT score
-    for (int i = 1, end = parent->children.count(); i < end; i++)
+    for (int i = 1, end = parent->ExpandedNum(); i < end; i++)
     {
-        const auto& child = parent->children[i];
+        const auto& child = parent->Child(i);
         double uct_score = UCTScore(child, parent);
 
         if (uct_score > max_score)
@@ -108,7 +106,7 @@ double AI_Mcts_A::UCTScore(
 {
     // If any child node has not been visited yet, return a high value to
     // encourage exploration
-    if (child->GetVisitedNum() == 0)
+    if (child->VisitsNum() == 0)
     {
         return std::numeric_limits<double>::max();
     }
@@ -116,21 +114,22 @@ double AI_Mcts_A::UCTScore(
     {
         // Otherwise, calculate the UCT score using the UCT formula.
         return static_cast<double>(
-            child->GetWinsNum()) / child->GetVisitedNum() +
-            ecf * qSqrt(qLn(parent->GetVisitedNum()) / child->GetVisitedNum()
+            child->WinsNum()) / child->VisitsNum() +
+            ecf * qSqrt(qLn(parent->VisitsNum()) / child->VisitsNum()
         );
     }
 }
 
-HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, HexMatch board)
+HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, HexBoard board)
 {
     // Start the simulation with the player at the node's move
-    HexAttacker currentAttacker = node->GetAttacker();
+    HexAttacker currentAttacker = node->Attacker();
     // Make the move at the node to make random moves from it
-    auto [_r, _c] = node->GetMove();
-    board(_r, _c) = static_cast<HexCell>(currentAttacker);
+    auto [_r, _c] = node->Move();
+    board(_r, _c, currentAttacker);
     // Continue simulation until a winner is detected
-    while (!board.WinnerDecided(currentAttacker))
+    bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker);
+    while (!WinnerDecided(board, currentAttacker))
     {
         // Switch player
         currentAttacker = !currentAttacker;
@@ -138,13 +137,13 @@ HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, Hex
         QVector<HexPoint> validMoves = GetValidMoves(board);
         // Generate a distribution and choose a move randomly
         auto [__r, __c] = validMoves[random.bounded(validMoves.size())];
-        board(__r, __c) = static_cast<HexCell>(currentAttacker);
+        board(__r, __c, currentAttacker);
     }
     return currentAttacker;
 }
 
 QVector<HexAttacker> AI_Mcts_A::ParallelPlayout(QSharedPointer<MctsNode> node,
-    const HexMatch &board,
+    const HexBoard &board,
     uint number_of_threads)
 {
     QVector<std::thread*> threads;
@@ -177,12 +176,12 @@ void AI_Mcts_A::Backpropagate(QSharedPointer<MctsNode> &node, HexAttacker winner
         currentCode->Visit();
         // If the winner is the same as the player at the node, increment the node's
         // win count
-        if (winner == currentCode->GetAttacker())
+        if (winner == currentCode->Attacker())
         {
             currentCode->Win();
         }
         // Move to the parent node for the next iteration
-        currentCode = currentCode->GetParent();
+        currentCode = currentCode->Parent();
     }
 }
 
@@ -190,23 +189,24 @@ QSharedPointer<MctsNode> AI_Mcts_A::BestChild()
 {
     double maxWinRatio = -1;
     QSharedPointer<MctsNode> bestChild;
-    for (const auto& child : root->children)
+    for (int i = 0; i < root->ExpandedNum(); i++)
     {
-        double winRatio = static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum();
+        double winRatio =
+            static_cast<double>(root->Child(i)->WinsNum()) / root->Child(i)->VisitsNum();
         if (winRatio > maxWinRatio)
         {
             maxWinRatio = winRatio;
-            bestChild = child;
+            bestChild = root->Child(i);
         }
     }
     Q_ASSERT(bestChild);
     return bestChild;
 }
 
-QVector<HexPoint> AI_Mcts_A::GetValidMoves(const HexMatch &board)
+QVector<HexPoint> AI_Mcts_A::GetValidMoves(const HexBoard &board)
 {
     QVector<HexPoint> validMoves;
-    for (int i = 0, end = board.GetOrder(); i < end; i++)
+    for (int i = 0, end = board.Order(); i < end; i++)
     {
         for (int j = 0; j < end; j++)
         {
@@ -219,3 +219,75 @@ QVector<HexPoint> AI_Mcts_A::GetValidMoves(const HexMatch &board)
     return validMoves;
 }
 
+#include <QStack>
+inline bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker)
+{
+    int num[2] { 0, 0 };
+    int &r = num[0];
+    int &c = num[1];
+
+    QStack<HexPoint> stack;
+    QVector<HexPoint> visited;
+    int order = board.Order();
+    for (int &p = num[*(!attacker)]; p < order; p++)
+    {
+        if (board(r, c) == attacker)
+        {
+            stack.push({r, c});
+        }
+    }
+
+    // dfs
+    while (!stack.isEmpty())
+    {
+        HexPoint coord = stack.pop();
+        r = coord.row;
+        c = coord.col;
+
+        if (visited.contains({r, c}))
+        {
+            continue;
+        }
+
+        visited.push_back({r, c});
+
+        // win
+        if (num[*attacker] == order - 1)
+        {
+            return true;
+        }
+        // push next possible point
+        int r_add = r + 1, r_sub = r - 1, c_add = c + 1, c_sub = c - 1;
+        if (r > 0)
+        {
+            if (board(r_sub, c) == attacker)
+            {
+                stack.push({r_sub, c});
+            }
+            if (c < order - 1 && board(r_sub, c_add) == attacker)
+            {
+                stack.push({r_sub, c_add});
+            }
+        }
+        if (r_add < order)
+        {
+            if (board(r_add, c) == attacker)
+            {
+                stack.push({r_add, c});
+            }
+            if (c > 0 && board(r_add, c_sub) == attacker)
+            {
+                stack.push({r_add, c_sub});
+            }
+        }
+        if (c > 0 && board(r, c_sub) == attacker)
+        {
+            stack.push({r, c_sub});
+        }
+        if (c_add < order && board(r, c_add) == attacker)
+        {
+            stack.push({r, c_add});
+        }
+    }
+    return false;
+}

@@ -7,7 +7,7 @@
 class QThreadPool;
 class QElapsedTimer;
 class MctsNode;
-class MctsWork;
+class MctsWork_E;
 
 class AI_Mcts_E : public HexAI
 {
@@ -15,14 +15,14 @@ public:
     // exploration constant factor, max decision time, is parallelized
     AI_Mcts_E(double ecf, int max_decision_time, bool parallelized = false);
     ~AI_Mcts_E() override;
-    QString Name() override { return "AI_Mcts_E"; }
-    HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) override;
+    std::string Name() const override { return "AI_Mcts_E"; }
+    HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) override;
 
 private:
 
-    void ExpandNode(const HexMatch& board);
+    void ExpandNode(const HexBoard& board);
     
-    void MctsSearch(int& itCounter, const HexMatch& board);
+    void MctsSearch(int& itCounter, const HexBoard& board);
 
     QSharedPointer<MctsNode> SelectChildPlayout();
 

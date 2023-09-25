@@ -8,7 +8,7 @@ class GamePvP : public GameMode
 public:
     GamePvP(
         bool *end,
-        HexMatch *_match,
+        HexBoard *_match,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr

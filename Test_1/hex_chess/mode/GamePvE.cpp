@@ -2,8 +2,8 @@
 
 #include <QDebug>
 
-#define _VERSION_ 'E'
-#define _ECF_ 1.41
+#define _VERSION_ 'G'
+#define _ECF_ 0.9
 #define _TIME_ 5
 #define _PARALLELIZED_ true
 
@@ -15,14 +15,13 @@
 #include "AI_Mcts_G.h"
 #endif
 
-GamePvE::GamePvE(
-    bool *end,
-    HexMatch *_match,
+GamePvE::GamePvE(bool *end,
+    HexBoard *_board,
     QVector<HexPoint> *_winner,
     HexAttacker *_attacker,
     bool isWhite,
     QObject *parent)
-    : GameMode::GameMode(end, _match, _winner, _attacker, parent)
+    : GameMode(end, _board, _winner, _attacker, parent)
     , thisAttacker(static_cast<HexAttacker>(isWhite))
 #if _VERSION_ == 'A'
     , AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_))
@@ -42,7 +41,7 @@ GamePvE::~GamePvE()
 void GamePvE::AIWork()
 {
     qDebug() << "----------" + AI->Name() + " is thinking----------" << Qt::endl;
-    auto [row, col] = AI->ChooseMove(*match, *nowAttacker);
+    auto [row, col] = AI->ChooseMove(*board, *nowAttacker);
     emit placeChess(row, col);
 }
 

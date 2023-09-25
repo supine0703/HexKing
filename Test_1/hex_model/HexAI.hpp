@@ -1,16 +1,19 @@
 #ifndef HEXAI_H
 #define HEXAI_H
 
-#include "HexMatch.hpp"
-
-class QString;
+#include "HexBoard.hpp"
+#include "HexPoint.hpp"
+#include <string>
 
 class HexAI
 {
+    HexAI(const HexAI&) = delete;
+    HexAI& operator=(const HexAI&) = delete;
 public:
+    HexAI() { }
     virtual ~HexAI() { };
-    virtual QString Name() = 0;
-    virtual HexPoint ChooseMove(const HexMatch& board,  HexAttacker attacker) = 0;
+    virtual std::string Name() const = 0;
+    virtual HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) = 0;
 };
 
 #endif // HEXAI_H
