@@ -3,7 +3,9 @@
 #include <QEventLoop>
 #include <QThreadPool>
 #include <QElapsedTimer>
+//#include "MctsWork.cpp"
 #include "MctsWork.h"
+#include "InferiorCell.hpp"
 
 #include <QDebug>
 
@@ -28,11 +30,12 @@ AI_Mcts_G::~AI_Mcts_G()
 
 HexPoint AI_Mcts_G::ChooseMove(const HexMatch &board, HexAttacker attacker)
 {
-    if (!stepNum++)
-    {
-        int set = board.GetOrder() / 2;
-        return HexPoint(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
-    }
+    //Create a first const node
+//    if (!stepNum++)
+//    {
+//        int set = board.GetOrder() / 2;
+//        return HexPoint(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
+//    }
     // Create a new root node for MCTS
     root = QSharedPointer<MctsNode>(new MctsNode(attacker, {-1, -1}, nullptr));
     // Expand root based on the current game state
@@ -58,7 +61,9 @@ HexPoint AI_Mcts_G::ChooseMove(const HexMatch &board, HexAttacker attacker)
 
 void AI_Mcts_G::ExpandNode(const HexMatch &board)
 {
-    QVector<HexPoint> validMoves = GetValidMoves(board);
+    QVector<HexPoint> validMoves = Movelimit(board);
+//    QVector<HexPoint> validMoves = GetValidMoves(board);
+    qDebug() << validMoves.count();
     for (const auto& move : validMoves)
     {
         root->children.push_back(
@@ -140,27 +145,27 @@ double AI_Mcts_G::UCTScore(const QSharedPointer<MctsNode> &child)
 QSharedPointer<MctsNode> AI_Mcts_G::BestChild()
 {
     QSharedPointer<MctsNode> bestChild;
-//    double maxWinRatio = -1;
-//    for (const auto& child : root->children)
-//    {
-//        double winRatio = static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum();
-//        if (winRatio > maxWinRatio)
-//        {
-//            maxWinRatio = winRatio;
-//            bestChild = child;
-//        }
-//    }
-
-    int maxVisit = 0;
+    double maxWinRatio = -1;
     for (const auto& child : root->children)
     {
-        int visits = child->GetVisitedNum();
-        if (visits > maxVisit)
+        double winRatio = static_cast<double>(child->GetWinsNum()) / child->GetVisitedNum();
+        if (winRatio > maxWinRatio)
         {
-            maxVisit = visits;
+            maxWinRatio = winRatio;
             bestChild = child;
         }
     }
+
+//    int maxVisit = 0;
+//    for (const auto& child : root->children)
+//    {
+//        int visits = child->GetVisitedNum();
+//        if (visits > maxVisit)
+//        {
+//            maxVisit = visits;
+//            bestChild = child;
+//        }
+//    }
     Q_ASSERT(bestChild);
     return bestChild;
 }

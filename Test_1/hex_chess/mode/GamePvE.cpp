@@ -2,9 +2,9 @@
 
 #include <QDebug>
 
-#define _VERSION_ 'E'
+#define _VERSION_ 'G'
 #define _ECF_ 1.41
-#define _TIME_ 5
+#define _TIME_ 20
 #define _PARALLELIZED_ true
 
 #if _VERSION_ == 'A'

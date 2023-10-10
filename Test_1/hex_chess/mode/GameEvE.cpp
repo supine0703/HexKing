@@ -5,7 +5,7 @@
 #define _VERSION_BLACK_ 'G'
 #define _VERSION_WHITE_ 'E'
 #define _ECF_ 0.9
-#define _TIME_ 5
+#define _TIME_ 10
 #define _PARALLELIZED_ true
 
 #if _VERSION_BLACK_ == 'A'
@@ -35,8 +35,8 @@ GameEvE::GameEvE(bool *end, HexMatch *_match,
     HexAttacker *_attacker, QObject *parent)
     : GameMode::GameMode(end, _match, _winner, _attacker, parent)
     , nowAttacker(_attacker)
-    , blackAI(AI_BLACK)
-    , whiteAI(AI_WHITE)
+    , blackAI(AI_WHITE)
+    , whiteAI(AI_BLACK)
 {
 }
 

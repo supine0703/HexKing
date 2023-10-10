@@ -86,3 +86,6 @@ QVector<HexPoint> GetValidMoves(const HexMatch& board)
     }
     return validMoves;
 }
+
+
+

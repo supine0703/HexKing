@@ -11,8 +11,8 @@
 #include <QThread>
 #include <QtMath>
 
-#define _GMODE _GMode::_PvP
-#define _ORDER 7
+#define _GMODE _GMode::_EvE
+#define _ORDER 11
 #define _RADIO 1
 #define _FIRST 1
 #define _BORDER_RH 0.25
