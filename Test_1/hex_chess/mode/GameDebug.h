@@ -1,29 +1,35 @@
-#ifndef GAMEEVE_H
-#define GAMEEVE_H
+#ifndef GAMEDEBUG_H
+#define GAMEDEBUG_H
 
 #include "GameMode.h"
 
 #include "HexAI.hpp"
 
-class GameEvE : public GameMode, private ChooseAI
+class GameDebug : public GameMode, private ChooseAI
 {
+
 public:
-    GameEvE(
+    GameDebug(
         bool *end,
         HexBoard *_board,
         QVector<HexPoint> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr
     );
-    ~GameEvE();
+    ~GameDebug();
 
     void AIWork() override;
     bool IsPlayer() override;
+    void RegretAMove();
+    void AddHistory(int row, int col);
 
 private:
     HexAttacker *nowAttacker;
-    HexAI *blackAI;
-    HexAI *whiteAI;
+    HexAI* blackAI;
+    HexAI* whiteAI;
+
+    QStack<HexPoint>* history;
+
 };
 
-#endif // GAMEEVE_H
+#endif // GAMEDEBUG_H

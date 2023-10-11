@@ -3,9 +3,9 @@
 
 #include "GameMode.h"
 
-class HexAI;
+#include "HexAI.hpp"
 
-class GamePvE : public GameMode
+class GamePvE : public GameMode, private ChooseAI
 {
 public:
     GamePvE(
@@ -23,7 +23,7 @@ public:
 
 private:
     HexAttacker thisAttacker;
-    HexAI *AI;
+    HexAI* AI;
 };
 
 #endif // GAMEPVE_H

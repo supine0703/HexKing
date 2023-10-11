@@ -12,20 +12,23 @@ class QThread;
 using gmode_t = char;
 enum class _GMode : gmode_t
 {
-    _END = 0,
-    _PvP = 1,
-    _PvE = 2,
-    _EvE = 3
+    _PvP = 0,
+    _PvE,
+    _EvE,
+    _Debug,
+    _END
 };
 
 class ChessBoard : public QWidget
 {
     Q_OBJECT
 public:
-    ChessBoard(QWidget *parent = nullptr);
+    ChessBoard(int Order, bool First, int GMD, QWidget *parent = nullptr);
     ~ChessBoard();
 
 private:
+    bool debug = false;
+    bool ai_is_working = false;
     QPushButton *Test;
 
     QThread *AIThread;
@@ -110,6 +113,7 @@ protected:
 signals:
     void setPieces(int row, int col);
     void AIWorking();
+    void RegretAMove();
 };
 
 #endif // CHESSBOARD_H

@@ -2,6 +2,7 @@
 #define HEXBOARD_HPP
 
 #include "HexCellArray.hpp"
+#include "qassert.h"
 
 class HexPoint;
 
@@ -45,6 +46,11 @@ public:
     HexBoard& operator()(const HexPoint& point, const HexAttacker& cell);
 
 //------------------------------------------------------------------------------
+
+    void subPiece() {
+        --piecesNum;
+        Q_ASSERT(piecesNum >= 0);
+    }
 
 private:
     uint8_t order;

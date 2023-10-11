@@ -57,7 +57,7 @@ void AI_Mcts_E::ExpandNode(const HexBoard &board)
     QVector<HexPoint> validMoves = GetValidMoves_E(board);
     for (const auto& move : validMoves)
     {
-        root->Expand(new MctsNode(root->Attacker(), move, board.EmptyNum(),root));
+        root->Expand(new MctsNode(root->Attacker(), move, board.EmptyNum(), root));
     }
 }
 

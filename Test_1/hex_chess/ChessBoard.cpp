@@ -1,4 +1,5 @@
 #include "ChessBoard.h"
+#include "GameDebug.h"
 #include "GamePvP.h"
 #include "GamePvE.h"
 #include "GameEvE.h"
@@ -21,18 +22,16 @@
 #define _RED_T_ QColor(234, 67, 53, 127)
 #define _BLUE_T_ QColor(66, 133, 244, 127)
 
-#define _GMODE _GMode::_PvP
-#define _ORDER 11
 #define _RADIO 1
-#define _FIRST 1
 #define _BORDER_RH 0.25
 #define _FONT_NAME "JetBrains Mono NL"
 
-ChessBoard::ChessBoard(QWidget *parent)
+
+ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     : QWidget(parent)
+    , order(Order)
+    , isPlayer(First)
     , AIThread(new QThread())
-    , isPlayer(_FIRST)
-    , order(_ORDER)
     , bottom(order)
     , right((order << 1) + 1)
     , pointsRows(bottom + 1)
@@ -57,10 +56,10 @@ ChessBoard::ChessBoard(QWidget *parent)
     , gridPath(new QPainterPath)
     , winnerPath(new QPainterPath)
 {
-    this->setGeometry(550, 200, 600, 600);
+    this->setGeometry(550, 200, 800, 600);
     this->setMouseTracking(true);
-//    qDebug() << QThread::idealThreadCount();
-    switch (_GMode(_GMODE))
+
+    switch (static_cast<_GMode>(GMD))
     {
     case _GMode::_PvP:
         gameMode = new GamePvP(&isEnd, board, winnerRoute, &attacker);
@@ -69,6 +68,7 @@ ChessBoard::ChessBoard(QWidget *parent)
         gameMode = new GamePvE(&isEnd, board, winnerRoute, &attacker, isPlayer);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
+            ai_is_working = false;
             PlaceChessPieces(_row, _col);
         });
         AIThread->start();
@@ -77,10 +77,24 @@ ChessBoard::ChessBoard(QWidget *parent)
         gameMode = new GameEvE(&isEnd, board, winnerRoute, &attacker);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
+            ai_is_working = false;
             PlaceChessPieces(_row, _col);
         });
         AIThread->start();
         isPlayer = false;
+        break;
+    case _GMode::_Debug:
+        debug = true;
+        gameMode = new GameDebug(&isEnd, board, winnerRoute, &attacker);
+        connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
+        connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
+            ai_is_working = false;
+            PlaceChessPieces(_row, _col);
+        });
+        AIThread->start();
+        isPlayer = true;
+        break;
+    case _GMode::_END:
         break;
     }
     gameMode->moveToThread(AIThread);
@@ -106,6 +120,36 @@ ChessBoard::ChessBoard(QWidget *parent)
             emit AIWorking();
             Test->setHidden(true);
         });
+    }
+
+    if (debug)
+    {
+        Test = new QPushButton("AI move", this);
+        Test->setGeometry(0, 0, 160, 80);
+        Test->setFont(QFont(fontName, 24));
+        connect(Test, &QPushButton::clicked, this, [=]() {
+            if (!ai_is_working) {
+                ai_is_working = true;
+                emit AIWorking();
+            }
+            else qDebug() << "ai is working";
+        });
+
+        connect(this, &ChessBoard::RegretAMove, (GameDebug*)gameMode, &GameDebug::RegretAMove);
+
+        Test = new QPushButton("Regret a move", this);
+        Test->setGeometry(0, 100, 160, 80);
+        Test->setFont(QFont(fontName, 24));
+        connect(Test, &QPushButton::clicked, this, [=]() {
+            if (!board->PiecesNum()) { qDebug() << "board is empty"; return; }
+            if (!ai_is_working) {
+                ai_is_working = true;
+                emit RegretAMove();
+            }
+            else qDebug() << "ai is working";
+        });
+
+        connect(this, &ChessBoard::setPieces, (GameDebug*)gameMode, &GameDebug::AddHistory);
     }
 }
 
@@ -161,7 +205,7 @@ void ChessBoard::paintEvent(QPaintEvent *event)
 {
     PaintChessBoard();
     PaintPiecesPlaced();
-    if (isPlayer && !isEnd)
+    if ((isPlayer || debug) && !isEnd)
     {
         PaintProjection();
     }
@@ -227,7 +271,7 @@ void ChessBoard::mouseMoveEvent(QMouseEvent *event)
 
 void ChessBoard::mousePressEvent(QMouseEvent *event)
 {
-    if (isPlayer && !isEnd)
+    if ((isPlayer || debug) && !isEnd)
     {
         press_row = mouse_row;
         press_col = mouse_col;
@@ -236,6 +280,11 @@ void ChessBoard::mousePressEvent(QMouseEvent *event)
 
 void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
 {
+    if (ai_is_working)
+    {
+        qDebug() << "ai is working";
+        return;
+    }
     if (!isEnd && press_row == mouse_row && press_col == mouse_col)
     {
         if (0 <= press_row && press_row < order && 0 <= press_col && press_col <= order)
@@ -453,6 +502,11 @@ void ChessBoard::PaintOtherComponents()
 
 void ChessBoard::PlaceChessPieces(int row, int col)
 {
+    if (debug && row == -1 && col == -1)
+    {
+        update();
+        return;
+    }
     Q_ASSERT((0 <= row && row < order && 0 <= col && col <= order));
     Q_ASSERT(board->GetCell(row, col) == HexCell::Empty);
     board->Placed(row, col, attacker);
@@ -461,8 +515,9 @@ void ChessBoard::PlaceChessPieces(int row, int col)
         << "(" << row << "," << col << ")" << Qt::endl;
     ConditionsDetermine();
     update();
-    if (!isPlayer && !isEnd)
+    if (!isPlayer && !isEnd && !debug)
     {
+        ai_is_working = true;
         emit AIWorking();
     }
 }

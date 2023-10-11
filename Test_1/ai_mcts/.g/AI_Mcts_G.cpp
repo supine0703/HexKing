@@ -131,14 +131,14 @@ QSharedPointer<MctsNode> AI_Mcts_G::BestChild()
 
 bool AI_Mcts_G::RootIteration(const HexBoard& board)
 {
-    for (int i = 0; i < root->ExpandedNum(); i++)
-    {
-        if (board(root->Child(i)->Move()) != HexCell::Empty)
-        {
-            root = root->Child(i);
-            root->Parent() = nullptr;
-            return true;
-        }
-    }
+//    for (int i = 0; i < root->ExpandedNum(); i++)
+//    {
+//        if (board(root->Child(i)->Move()) != HexCell::Empty)
+//        {
+//            root = root->Child(i);
+//            root->Parent() = nullptr;
+//            return true;
+//        }
+//    }
     return false;
 }

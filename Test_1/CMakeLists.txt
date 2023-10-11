@@ -17,6 +17,7 @@ include_directories(
     hex_model
     hex_chess
     hex_chess/mode
+    hex_ui
 )
 
 include_directories(
@@ -24,6 +25,14 @@ include_directories(
     ai_mcts/.a
     ai_mcts/.e
     ai_mcts/.g
+)
+
+set(UI
+    hex_ui/MainWindow.h
+    hex_ui/MainWindow.cpp
+    hex_ui/StartWidget.h
+    hex_ui/StartWidget.cpp
+    hex_ui/StartWidget.ui
 )
 
 set(MODEL_SOURCES
@@ -52,6 +61,8 @@ set(CHESS_SOURCES
     hex_chess/mode/GamePvE.cpp
     hex_chess/mode/GameEvE.h
     hex_chess/mode/GameEvE.cpp
+    hex_chess/mode/GameDebug.h
+    hex_chess/mode/GameDebug.cpp
 
     hex_chess/ChessBoard.h
     hex_chess/ChessBoard.cpp
@@ -80,12 +91,15 @@ set(PROJECT_SOURCES
     ${MODEL_SOURCES}
     ${CHESS_SOURCES}
     ${AI_MCTS_SOURCES}
+    ${UI}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Test_1
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Test_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -104,7 +118,9 @@ else()
         )
     endif()
 endif()
-
+target_compile_definitions(Test_1
+    PRIVATE CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/share/config.txt"
+)
 target_link_libraries(Test_1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

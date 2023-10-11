@@ -2,20 +2,8 @@
 
 #include <QDebug>
 
-#define _VERSION_ 'G'
-#define _ECF_ 0.9
-#define _TIME_ 5
-#define _PARALLELIZED_ true
-
-#if _VERSION_ == 'A'
-#include "AI_Mcts_A.h"
-#elif _VERSION_ == 'E'
-#include "AI_Mcts_E.h"
-#elif _VERSION_ == 'G'
-#include "AI_Mcts_G.h"
-#endif
-
-GamePvE::GamePvE(bool *end,
+GamePvE::GamePvE(
+    bool *end,
     HexBoard *_board,
     QVector<HexPoint> *_winner,
     HexAttacker *_attacker,
@@ -23,14 +11,8 @@ GamePvE::GamePvE(bool *end,
     QObject *parent)
     : GameMode(end, _board, _winner, _attacker, parent)
     , thisAttacker(static_cast<HexAttacker>(isWhite))
-#if _VERSION_ == 'A'
-    , AI(new AI_Mcts_A(_ECF_, _TIME_, _PARALLELIZED_))
-#elif _VERSION_ == 'E'
-    , AI(new AI_Mcts_E(_ECF_, _TIME_, _PARALLELIZED_))
-#elif _VERSION_ == 'G'
-    , AI(new AI_Mcts_G(_ECF_, _TIME_, _PARALLELIZED_))
-#endif
 {
+    choose_ai(1 + isWhite, AI, AI);
 }
 
 GamePvE::~GamePvE()

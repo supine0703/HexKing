@@ -16,4 +16,11 @@ public:
     virtual HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) = 0;
 };
 
+
+class ChooseAI
+{
+public:
+    virtual ~ChooseAI() { }
+    virtual void choose_ai(int key, HexAI*& black, HexAI*& white);
+};
 #endif // HEXAI_H
