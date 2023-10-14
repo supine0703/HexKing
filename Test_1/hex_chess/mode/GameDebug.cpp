@@ -1,6 +1,6 @@
 #include "GameDebug.h"
 
-#include "QDebug"
+#include <HexLog.h>
 #include <QStack>
 
 GameDebug::GameDebug(
@@ -26,14 +26,18 @@ void GameDebug::AIWork()
 {
     if (*(*nowAttacker))
     {
-        qDebug() << "----------White: " + whiteAI->Name() + " is thinking----------" << Qt::endl;
+        hexLog << dm << whiteAI->Name() << hst::whtai;
         auto [row, col] = whiteAI->ChooseMove(*board, *nowAttacker);
+        hexLog << whiteAI->Name() << "placed" << "white"
+               << "(" << row << "," << col << ")" << hlg::wdl << hlg::ln;
         emit placeChess(row, col);
     }
     else
     {
-        qDebug() << "----------Black: " + blackAI->Name() + " is thinking----------" << Qt::endl;
+        hexLog << dm << blackAI->Name() << hst::blkai;
         auto [row, col] = blackAI->ChooseMove(*board, *nowAttacker);
+        hexLog << blackAI->Name() << "placed" << "black"
+               << "(" << row << "," << col << ")" << hlg::bdl << hlg::ln;
         emit placeChess(row, col);
     }
 }
@@ -49,8 +53,9 @@ void GameDebug::RegretAMove()
 
     Q_ASSERT((*board)(move) != HexCell::Empty);
     *nowAttacker = !(*nowAttacker);
-    qDebug() << "Regret a move" << (*(*nowAttacker) ? "White" : "Black")
-             <<"(" << move.row << "," << move.col << ")" << Qt::endl;
+    hexLog << "Regret a move" << (*(*nowAttacker) ? "White" : "Black")
+           <<"(" << move.row << "," << move.col << ")"
+           << (*nowAttacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
     (*board)(move, HexCell::Empty);
 
     board->subPiece();
@@ -61,4 +66,10 @@ void GameDebug::RegretAMove()
 void GameDebug::AddHistory(int row, int col)
 {
     history->push({row, col});
+}
+
+void GameDebug::StopAI()
+{
+    whiteAI->StopWork();
+    blackAI->StopWork();
 }

@@ -3,30 +3,30 @@
 
 #include <QMainWindow>
 
-#include <QMenuBar>
-#include <QMenu>
+QT_BEGIN_NAMESPACE
+class QTextEdit;
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    void StartGame(int order, int first, int gmd);
 
 private:
 
-    QWidget* runWidget;
+    void InitChess(int order, int first, int gmd);
 
-    QMenuBar* menuBar;
-    QMenu* file;
-    QMenu* options;
-    QMenu* order;
-    QMenu* mode;
-    QMenu* function;
+    QAction* funcView;
+    QAction* logView;
 
+    QDockWidget* funcDock;
+    QDockWidget* logDock;
+    QTextEdit* logTxt;
 
-
-
+    int order;
+    bool first;
+    int gmd;
 signals:
 
 };

@@ -5,6 +5,7 @@
 #include <QtMath>
 #include <thread>
 #include "MctsNode.hpp"
+#include "HexLog.h"
 
 AI_Mcts_A::AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized)
     : HexAI()
@@ -17,6 +18,7 @@ AI_Mcts_A::AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized)
 
 HexPoint AI_Mcts_A::ChooseMove(const HexBoard &board, HexAttacker attacker)
 {
+    exit = false;
     // Create a new root node for MCTS
     root = QSharedPointer<MctsNode>(new MctsNode(attacker, qMakePair(-1, -1), board.EmptyNum()));
     // Prepare for potential parallelism
@@ -32,12 +34,22 @@ HexPoint AI_Mcts_A::ChooseMove(const HexBoard &board, HexAttacker attacker)
     // Run MCTS until the timer runs out to update root's and its children's
     // statistics
     MtcsSearch(mcts_itCounter, board, number_of_threads);
+    if (exit)
+    {
+        return {-1, -1};
+    }
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
-    qDebug() << bestChild->WinsNum() << bestChild->VisitsNum()
-             << "| total:" << root->VisitsNum()
-             << "| time:" << usedTime.elapsed() << Qt::endl;
+    hexLog << bestChild->WinsNum() << bestChild->VisitsNum()
+           << "| total:" << root->VisitsNum()
+           << "| time:" << usedTime.elapsed()
+           << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
     return bestChild->Move();
+}
+
+void AI_Mcts_A::StopWork()
+{
+    exit = true;
 }
 
 void AI_Mcts_A::ExpandNode(const QSharedPointer<MctsNode> &node, const HexBoard &board)

@@ -10,8 +10,14 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>649</height>
+    <height>650</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>780</width>
+    <height>632</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>StartWidget</string>
@@ -21,19 +27,6 @@
 </string>
   </property>
   <layout class="QGridLayout" name="backLayout">
-   <item row="1" column="0">
-    <spacer name="_mainLeftSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="0" column="1">
     <spacer name="_mainTopSpacer">
      <property name="orientation">
@@ -43,19 +36,6 @@
       <size>
        <width>20</width>
        <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="2">
-    <spacer name="_mainRightSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -733,6 +713,32 @@ QGroupBox::title{
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="1" column="2">
+    <spacer name="_mainRightSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="0">
+    <spacer name="_mainLeftSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

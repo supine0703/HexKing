@@ -25,13 +25,13 @@ void ChooseAI::choose_ai(int key, HexAI*& black, HexAI*& white)
         HexAI* ai(nullptr);
         switch (version)
         {
-        case 1:
+        case 0:
             ai = new AI_Mcts_A(ecf, time, parallelized);
             break;
-        case 5:
+        case 1:
             ai = new AI_Mcts_E(ecf, time, parallelized);
             break;
-        case 7:
+        case 2:
             ai = new AI_Mcts_G(ecf, time, parallelized);
             break;
         }

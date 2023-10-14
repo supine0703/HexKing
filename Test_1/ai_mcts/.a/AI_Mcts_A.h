@@ -20,6 +20,7 @@ public:
     ~AI_Mcts_A() { exit = true; };
     std::string Name() const override { return "AI_Mcts_A"; }
     HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) override;
+    void StopWork() override;
 
 private:
     void ExpandNode(const QSharedPointer<MctsNode>& node, const HexBoard& board);

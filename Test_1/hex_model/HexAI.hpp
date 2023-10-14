@@ -14,6 +14,7 @@ public:
     virtual ~HexAI() { };
     virtual std::string Name() const = 0;
     virtual HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) = 0;
+    virtual void StopWork() = 0;
 };
 
 

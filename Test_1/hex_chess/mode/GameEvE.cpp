@@ -1,6 +1,6 @@
 #include "GameEvE.h"
 
-#include <QDebug>
+#include "HexLog.h"
 
 GameEvE::GameEvE(
     bool *end,
@@ -24,14 +24,18 @@ void GameEvE::AIWork()
 {
     if (*(*nowAttacker))
     {
-        qDebug() << "----------White: " + whiteAI->Name() + " is thinking----------" << Qt::endl;
+        hexLog << whiteAI->Name() << hst::whtai;
         auto [row, col] = whiteAI->ChooseMove(*board, *nowAttacker);
+        hexLog << whiteAI->Name() << "placed" << "white"
+               << "(" << row << "," << col << ")" << hlg::wdl << hlg::ln;
         emit placeChess(row, col);
     }
     else
     {
-        qDebug() << "----------Black: " + blackAI->Name() + " is thinking----------" << Qt::endl;
+        hexLog << blackAI->Name() << hst::blkai;
         auto [row, col] = blackAI->ChooseMove(*board, *nowAttacker);
+        hexLog << blackAI->Name() << "placed" << "black"
+               << "(" << row << "," << col << ")" << hlg::bdl << hlg::ln;
         emit placeChess(row, col);
     }
 }

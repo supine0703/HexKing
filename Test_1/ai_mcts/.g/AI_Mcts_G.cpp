@@ -4,12 +4,13 @@
 #include <QElapsedTimer>
 #include "MctsWork_G.h"
 
-#include <QDebug>
+#include "HexLog.h"
 
 AI_Mcts_G::AI_Mcts_G(double ecf, uint max_decision_time, bool parallelized)
     : HexAI()
     , ecf(ecf)
     , endTime(max_decision_time * 1000)
+    , copyTime(endTime)
     , parallelized(parallelized)
     , pool(parallelized ? new QThreadPool() : nullptr)
 {
@@ -27,6 +28,7 @@ AI_Mcts_G::~AI_Mcts_G()
 
 HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
 {
+    endTime = copyTime;
     if (board.PiecesNum() < 2)
     {
         int set = board.Order() / 2;
@@ -43,9 +45,9 @@ HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
     default:
         if (RootIteration(board))
         {
-            qDebug() << "Iteration success" << "| visitsNum :" << root->VisitsNum()
-                     << "(" << root->Move().row << "," << root->Move().col << ")"
-                     << Qt::endl;
+            hexLog << "Iteration success" << "| visitsNum :" << root->VisitsNum()
+                   << "(" << root->Move().row << "," << root->Move().col << ")"
+                   << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
             break;
         }
     case 1:
@@ -64,16 +66,21 @@ HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
     int visitsTotal = root->VisitsNum();
     root = BestChild();
     root->Parent() = nullptr;
-    qDebug() << root->WinsNum() << "/" << root->VisitsNum()
-             << "| total:" << visitsTotal
-             << "| time:" << usedTime->elapsed()
-             << "| step:" << ((board.PiecesNum() + 1) >> 1)
-             << Qt::endl;
+    hexLog << root->WinsNum() << "/" << root->VisitsNum()
+           << "| total:" << visitsTotal
+           << "| time:" << usedTime->elapsed()
+           << "| step:" << ((board.PiecesNum() + 1) >> 1)
+           << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
     HexPoint bestMove = root->Move();
 
     delete usedTime;
     usedTime = nullptr;
     return bestMove;
+}
+
+void AI_Mcts_G::StopWork()
+{
+    endTime = 0;
 }
 
 void AI_Mcts_G::MctsSearch(const HexBoard &board)

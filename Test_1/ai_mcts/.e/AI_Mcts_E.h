@@ -17,6 +17,7 @@ public:
     ~AI_Mcts_E() override;
     std::string Name() const override { return "AI_Mcts_E"; }
     HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) override;
+    void StopWork() override;
 
 private:
 

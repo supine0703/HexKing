@@ -27,6 +27,7 @@ public:
     ~ChessBoard();
 
 private:
+    bool demo = false;
     bool debug = false;
     bool ai_is_working = false;
     QPushButton *Test;
@@ -114,6 +115,13 @@ signals:
     void setPieces(int row, int col);
     void AIWorking();
     void RegretAMove();
+
+public slots:
+    void ai_move();
+    void ai_stop();
+    void ai_demo();
+    void demo_stop();
+    void regret_a_move();
 };
 
 #endif // CHESSBOARD_H

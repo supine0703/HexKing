@@ -1,6 +1,6 @@
 #include "GamePvE.h"
 
-#include <QDebug>
+#include "HexLog.h"
 
 GamePvE::GamePvE(
     bool *end,
@@ -22,8 +22,11 @@ GamePvE::~GamePvE()
 
 void GamePvE::AIWork()
 {
-    qDebug() << "----------" + AI->Name() + " is thinking----------" << Qt::endl;
+    hexLog << AI->Name() << (*(*nowAttacker) ? hst::whtai : hst::blkai);
     auto [row, col] = AI->ChooseMove(*board, *nowAttacker);
+    hexLog << AI->Name() << "placed" << (*(*nowAttacker) ? "white" : "black")
+           << "(" << row << "," << col << ")"
+           << (*(*nowAttacker) ? hlg::wdl : hlg::bdl) << hlg::ln;
     emit placeChess(row, col);
 }
 

@@ -17,6 +17,7 @@ public:
     ~AI_Mcts_G() override;
     std::string Name() const override { return "AI_Mcts_G"; }
     HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) override;
+    void StopWork() override;
 
 private:
     void MctsSearch(const HexBoard& board);
@@ -27,6 +28,7 @@ private:
 
     double ecf;
     uint endTime;
+    uint copyTime;
     bool parallelized;
     QElapsedTimer* usedTime;
     QSharedPointer<MctsNode> root;

@@ -33,6 +33,9 @@ set(UI
     hex_ui/StartWidget.h
     hex_ui/StartWidget.cpp
     hex_ui/StartWidget.ui
+    hex_ui/FuncWidget.h
+    hex_ui/FuncWidget.cpp
+    hex_ui/FuncWidget.ui
 )
 
 set(MODEL_SOURCES
@@ -98,7 +101,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Test_1
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
+        hex_ui/LogWidget.h hex_ui/LogWidget.cpp hex_ui/LogWidget.ui
+        hex_ui/HexLog.h hex_ui/HexLog.cpp
 
     )
 # Define target properties for Android with Qt 6 as:

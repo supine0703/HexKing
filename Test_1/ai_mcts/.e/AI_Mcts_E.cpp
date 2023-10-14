@@ -5,7 +5,7 @@
 #include <QElapsedTimer>
 #include "MctsWork_E.h"
 
-#include <QDebug>
+#include "HexLog.h"
 
 AI_Mcts_E::AI_Mcts_E(double ecf, int max_decision_time, bool parallelized)
     : HexAI()
@@ -31,6 +31,7 @@ AI_Mcts_E::~AI_Mcts_E()
 HexPoint AI_Mcts_E::ChooseMove(const HexBoard &board, HexAttacker attacker)
 {
     // Create a new root node for MCTS
+    exit = false;
     root = QSharedPointer<MctsNode>(new MctsNode(attacker, {-1, -1}, board.EmptyNum(), nullptr));
     // Expand root based on the current game state
     ExpandNode(board);
@@ -42,14 +43,20 @@ HexPoint AI_Mcts_E::ChooseMove(const HexBoard &board, HexAttacker attacker)
     MctsSearch(mcts_itCounter, board);
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
-    qDebug() << bestChild->WinsNum() << bestChild->VisitsNum()
+    hexLog << bestChild->WinsNum() << bestChild->VisitsNum()
              << "| total:" << root->VisitsNum()
-             << "| time:" << usedTime->elapsed() << Qt::endl;
+             << "| time:" << usedTime->elapsed()
+             << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
     HexPoint bestMove = bestChild->Move();
     root = nullptr;
     delete usedTime;
     usedTime = nullptr;
     return bestMove;
+}
+
+void AI_Mcts_E::StopWork()
+{
+    exit = true;
 }
 
 void AI_Mcts_E::ExpandNode(const HexBoard &board)
@@ -86,7 +93,7 @@ void AI_Mcts_E::MctsSearch(int &itCounter, const HexBoard &board)
     }
     else
     {
-        while (usedTime->elapsed() < endTime)
+        while (!exit && usedTime->elapsed() < endTime)
         {
             QSharedPointer<MctsNode> chosenChild = SelectChildPlayout();
             MctsWork_E(chosenChild, board).run();

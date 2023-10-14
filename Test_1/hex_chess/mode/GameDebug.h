@@ -22,6 +22,9 @@ public:
     bool IsPlayer() override;
     void RegretAMove();
     void AddHistory(int row, int col);
+    void StopAI();
+
+    QString dm = "";
 
 private:
     HexAttacker *nowAttacker;
