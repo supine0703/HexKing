@@ -114,6 +114,10 @@ signals:
     void setPieces(int row, int col);
     void AIWorking();
     void RegretAMove();
+
+public slots:
+    void handleAIMove();
+
 };
 
 #endif // CHESSBOARD_H

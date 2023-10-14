@@ -3,6 +3,7 @@
 #include "GamePvP.h"
 #include "GamePvE.h"
 #include "GameEvE.h"
+#include "QMainWindow"
 
 #include <QPushButton>
 
@@ -56,7 +57,7 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     , gridPath(new QPainterPath)
     , winnerPath(new QPainterPath)
 {
-    this->setGeometry(550, 200, 800, 600);
+//    this->setGeometry(550, 200, 800, 600);
     this->setMouseTracking(true);
 
     switch (static_cast<_GMode>(GMD))
@@ -110,7 +111,6 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
 
     coord_f1.setFamily(fontName);
     coord_f2.setFamily(fontName);
-
     if (!isPlayer)
     {
         Test = new QPushButton("AI First", this);
@@ -124,10 +124,10 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
 
     if (debug)
     {
-        Test = new QPushButton("AI move", this);
-        Test->setGeometry(0, 0, 160, 80);
-        Test->setFont(QFont(fontName, 24));
-        connect(Test, &QPushButton::clicked, this, [=]() {
+//        Test = new QPushButton("AI move", this);
+//        Test->setGeometry(0, 0, 160, 80);
+//        Test->setFont(QFont(fontName, 24));
+        connect(parent, , this, [=]() {
             if (!ai_is_working) {
                 ai_is_working = true;
                 emit AIWorking();
@@ -135,19 +135,19 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
             else qDebug() << "ai is working";
         });
 
-        connect(this, &ChessBoard::RegretAMove, (GameDebug*)gameMode, &GameDebug::RegretAMove);
+//        connect(this, &ChessBoard::RegretAMove, (GameDebug*)gameMode, &GameDebug::RegretAMove);
 
-        Test = new QPushButton("Regret a move", this);
-        Test->setGeometry(0, 100, 160, 80);
-        Test->setFont(QFont(fontName, 24));
-        connect(Test, &QPushButton::clicked, this, [=]() {
-            if (!board->PiecesNum()) { qDebug() << "board is empty"; return; }
-            if (!ai_is_working) {
-                ai_is_working = true;
-                emit RegretAMove();
-            }
-            else qDebug() << "ai is working";
-        });
+//        Test = new QPushButton("Regret a move", this);
+//        Test->setGeometry(0, 100, 160, 80);
+//        Test->setFont(QFont(fontName, 24));
+//        connect(Test, &QPushButton::clicked, this, [=]() {
+//            if (!board->PiecesNum()) { qDebug() << "board is empty"; return; }
+//            if (!ai_is_working) {
+//                ai_is_working = true;
+//                emit RegretAMove();
+//            }
+//            else qDebug() << "ai is working";
+//        });
 
         connect(this, &ChessBoard::setPieces, (GameDebug*)gameMode, &GameDebug::AddHistory);
     }
@@ -173,7 +173,6 @@ ChessBoard::~ChessBoard()
     delete borderPath_lr;
     delete gridPath;
     delete winnerPath;
-    
     delete board;
 }
 
@@ -199,6 +198,7 @@ void ChessBoard::resizeEvent(QResizeEvent *event)
     UpdateGridPath();
     UpdateWinnerPath();
     UpdateCoordPoints();
+
 }
 
 void ChessBoard::paintEvent(QPaintEvent *event)

@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>649</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,19 @@
 </string>
   </property>
   <layout class="QGridLayout" name="backLayout">
+   <item row="3" column="1">
+    <spacer name="_mainBottomSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="1" column="0">
     <spacer name="_mainLeftSpacer">
      <property name="orientation">
@@ -34,19 +47,6 @@
      </property>
     </spacer>
    </item>
-   <item row="0" column="1">
-    <spacer name="_mainTopSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="1" column="2">
     <spacer name="_mainRightSpacer">
      <property name="orientation">
@@ -56,19 +56,6 @@
       <size>
        <width>40</width>
        <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="3" column="1">
-    <spacer name="_mainBottomSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
       </size>
      </property>
     </spacer>
@@ -733,6 +720,19 @@ QGroupBox::title{
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="0" column="1">
+    <spacer name="_mainTopSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
