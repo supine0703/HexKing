@@ -103,6 +103,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         hex_ui/LogWidget.h hex_ui/LogWidget.cpp hex_ui/LogWidget.ui
         hex_ui/HexLog.h hex_ui/HexLog.cpp
+        hex_ui/HexDock.h hex_ui/HexDock.cpp
 
     )
 # Define target properties for Android with Qt 6 as:

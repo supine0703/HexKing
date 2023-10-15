@@ -4,7 +4,7 @@
 #include "ChessBoard.h"
 #include "FuncWidget.h"
 #include "StartWidget.h"
-
+#include "HexDock.h"
 
 #include <QMenu>
 #include <QMenuBar>
@@ -30,20 +30,22 @@ MainWindow::MainWindow(QWidget *parent)
 
     funcView = new QAction("FuncView", this);
     funcView->setCheckable(true);
+    funcView->setChecked(fcViewCp = true);
     logView = new QAction("LogView", this);
     logView->setCheckable(true);
+    logView->setChecked(true);
 
     auto file = this->menuBar()->addMenu("&File");
     auto view = this->menuBar()->addMenu("&VieW");
 //    auto help = this->menuBar()->addMenu("&Help");
 
 
-    funcDock = new QDockWidget("FuncView", this);
+    funcDock = new HexDock("FuncView", this);
     funcDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     funcDock->setWidget(new FuncWidget(funcDock));
 
     LogWidget* logWidget;
-    logDock = new QDockWidget("LogView", this);
+    logDock = new HexDock("LogView", this);
     logDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
     logDock->setWidget(logWidget = new LogWidget(logDock));
     logTxt = logWidget->LogTxt();
@@ -73,9 +75,8 @@ MainWindow::MainWindow(QWidget *parent)
             QMessageBox::Yes | QMessageBox::No
         );
         if (reply == QMessageBox::Yes) {
-            funcView->setChecked(false);
+            fcViewCp = funcView->isChecked();
             funcDock->setHidden(true);
-            logView->setChecked(false);
             logDock->setHidden(true);
             this->menuBar()->setVisible(false);
             this->setCentralWidget(new StartWidget(this));
@@ -112,13 +113,6 @@ MainWindow::MainWindow(QWidget *parent)
             funcDock->setHidden(true);
         }
     });
-    connect(funcDock, &QDockWidget::visibilityChanged, this, [&](auto visible) {
-        if (!visible) {
-            funcView->setChecked(false);
-        } else {
-            funcView->setChecked(true);
-        }
-    });
     connect(logView, &QAction::toggled, this, [&](auto visible) {
         if (visible) {
             logDock->setHidden(false);
@@ -126,12 +120,11 @@ MainWindow::MainWindow(QWidget *parent)
             logDock->setHidden(true);
         }
     });
-    connect(logDock, &QDockWidget::visibilityChanged, this, [&](auto visible) {
-        if (!visible) {
-            logView->setChecked(false);
-        } else {
-            logView->setChecked(true);
-        }
+    connect(funcDock, &HexDock::clickClose, this, [&]() {
+        funcView->setChecked(false);
+    });
+    connect(logDock, &HexDock::clickClose, this, [&]() {
+        logView->setChecked(false);
     });
     connect(&hexLog, &HexLog::txt, this, [&](auto str, auto fmt) {
         QScrollBar *bar = logTxt->verticalScrollBar();
@@ -154,16 +147,16 @@ void MainWindow::InitChess(int order, int first, int gmd)
     this->gmd = gmd;
     this->setCentralWidget(new ChessBoard(this->order, this->first, this->gmd, this));
     this->menuBar()->setHidden(false);
+    logDock->setHidden(!logView->isChecked());
     if (gmd != 3)
     {
+        funcView->setChecked(false);
         funcView->setEnabled(false);
         return;
     }
+    funcView->setChecked(fcViewCp);
     funcView->setEnabled(true);
-    funcView->setChecked(true);
-    funcDock->setHidden(false);
-    logView->setChecked(true);
-    logDock->setHidden(false);
+    funcDock->setHidden(!funcView->isChecked());
     auto chess = this->centralWidget();
     connect(
         static_cast<FuncWidget*>(funcDock->widget()), &FuncWidget::AIMove,

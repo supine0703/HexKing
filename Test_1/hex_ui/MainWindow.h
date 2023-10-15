@@ -5,6 +5,7 @@
 
 QT_BEGIN_NAMESPACE
 class QTextEdit;
+class HexDock;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
@@ -20,12 +21,13 @@ private:
     QAction* funcView;
     QAction* logView;
 
-    QDockWidget* funcDock;
-    QDockWidget* logDock;
+    HexDock* funcDock;
+    HexDock* logDock;
     QTextEdit* logTxt;
 
-    int order;
+    bool fcViewCp;
     bool first;
+    int order;
     int gmd;
 signals:
 
