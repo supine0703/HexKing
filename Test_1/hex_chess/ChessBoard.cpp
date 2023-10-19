@@ -49,10 +49,10 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     , black_t(new QBrush(_RED_T_, Qt::SolidPattern))
     , white_t(new QBrush(_BLUE_T_, Qt::SolidPattern))
     , fontName(_FONT_NAME)
-    , board(new HexBoard(order))
+    , board(new HexMatrix(order))
     , points(new QVector<QVector<QPointF>>(pointsRows, QVector<QPointF>(pointsCols)))
     , coordPoints(new QVector<QPointF>(order<<1))
-    , winnerRoute(new QVector<HexPoint>)
+    , winnerRoute(new QVector<HexLocation>)
     , borderPath_ud(new QPainterPath)
     , borderPath_lr(new QPainterPath)
     , gridPath(new QPainterPath)
@@ -71,7 +71,7 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             ai_is_working = false;
-            hexLog << hst::plyer;
+            hexLog() << hst::plyer;
             PlaceChessPieces(_row, _col);
         });
         AIThread->start();
@@ -81,7 +81,7 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             ai_is_working = false;
-            hexLog << hst::plyer;
+            hexLog() << hst::plyer;
             PlaceChessPieces(_row, _col);
         });
         AIThread->start();
@@ -93,7 +93,8 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             ai_is_working = false;
-            hexLog << hst::plyer;
+            hexLog() << hst::plyer;
+            if (_row == 254) return;
             PlaceChessPieces(_row, _col);
         });
         connect(this, &ChessBoard::setPieces, (GameDebug*)gameMode, &GameDebug::AddHistory);
@@ -289,7 +290,7 @@ void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
 {
     if (ai_is_working)
     {
-        hexLog << hst::aiwarn;
+        hexLog() << hst::aiwarn;
         return;
     }
     if (!isEnd && press_row == mouse_row && press_col == mouse_col)
@@ -298,7 +299,7 @@ void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
         {
             if (board->GetCell(press_row, press_col) == HexCell::Empty)
             {
-                hexLog << "Player set" << (*attacker ? "white" : "black")
+                hexLog() << "Player set" << (*attacker ? "white" : "black")
                        << "(" << (int)press_row << "," << (int)press_col << ")"
                        << (*attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl)
                        << hlg::ln;
@@ -535,7 +536,7 @@ void ChessBoard::ConditionsDetermine()
     gameMode->Determine();
     if (isEnd)
     {
-        hexLog << "The winer is :" << (*attacker ? "White" : "Black")
+        hexLog() << "The winer is :" << (*attacker ? "White" : "Black")
                << (*attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
         demo_stop();
         UpdateWinnerPath();
@@ -554,7 +555,7 @@ void ChessBoard::ai_move()
         ai_is_working = true;
         emit AIWorking();
     }
-    else if(ai_is_working) hexLog << hst::aiwarn;
+    else if(ai_is_working) hexLog() << hst::aiwarn;
 }
 
 void ChessBoard::ai_stop()
@@ -581,13 +582,13 @@ void ChessBoard::demo_stop()
 
 void ChessBoard::regret_a_move()
 {
-    if (!board->PiecesNum()) { hexLog << "board is empty" << hlg::endl; return; }
+    if (!board->PiecesNum()) { hexLog() << "board is empty" << hlg::endl; return; }
     if (!ai_is_working && !isEnd)
     {
         ai_is_working = true;
         emit RegretAMove();
     }
-    else if(ai_is_working) hexLog << hst::aiwarn;
+    else if(ai_is_working) hexLog() << hst::aiwarn;
 }
 
 

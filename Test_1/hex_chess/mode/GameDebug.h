@@ -11,8 +11,8 @@ class GameDebug : public GameMode, private ChooseAI
 public:
     GameDebug(
         bool *end,
-        HexBoard *_board,
-        QVector<HexPoint> *_winner,
+        HexMatrix *_board,
+        QVector<HexLocation> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr
     );
@@ -30,8 +30,8 @@ private:
     HexAttacker *nowAttacker;
     HexAI* blackAI;
     HexAI* whiteAI;
-
-    QStack<HexPoint>* history;
+    
+    QStack<HexLocation>* history;
 
 };
 

@@ -22,7 +22,7 @@
 
 MctsWork_G::MctsWork_G(
     const QSharedPointer<MctsNode>& root,
-    const HexBoard& board,
+    const HexMatrix& board,
     const QElapsedTimer& usedTime,
     const uint& endTime,
     const double& ecf)
@@ -39,7 +39,7 @@ void MctsWork_G::run()
 {
     while (usedTime.elapsed() < endTime)
     {
-        HexBoard virBoard(board);
+        HexMatrix virBoard(board);
         QSharedPointer<MctsNode> node = root;
         nowAttacker = !node->Attacker();
         SelectChildPlayout(virBoard, node);
@@ -55,7 +55,7 @@ double MctsWork_G::UCTScore(double cWins, double cVisits, double pVisits)
     return cWins / cVisits + ecf * qSqrt(qLn(pVisits) / cVisits);
 }
 
-void MctsWork_G::SelectChildPlayout(HexBoard& virBoard, QSharedPointer<MctsNode>& node)
+void MctsWork_G::SelectChildPlayout(HexMatrix& virBoard, QSharedPointer<MctsNode>& node)
 {
     while (node->ExpandedNum() == node->ChildrenTotal())
     {
@@ -87,8 +87,8 @@ void MctsWork_G::SelectChildPlayout(HexBoard& virBoard, QSharedPointer<MctsNode>
     }
 }
 
-bool WinnerDecided_G(const HexBoard& board,const HexAttacker& attacker);
-void MctsWork_G::ExpandNode(QSharedPointer<MctsNode>& node, HexBoard& virBoard)
+bool WinnerDecided_G(const HexMatrix& board,const HexAttacker& attacker);
+void MctsWork_G::ExpandNode(QSharedPointer<MctsNode>& node, HexMatrix& virBoard)
 {
     if (WinnerDecided_G(virBoard, node->Attacker()) || node->ChildrenTotal() == 0)
     {
@@ -136,9 +136,9 @@ void MctsWork_G::ExpandNode(QSharedPointer<MctsNode>& node, HexBoard& virBoard)
     node = node->Child(expandedNum);
 }
 
-bool WinnerDecided_G(const HexBoard& board,const HexAttacker& attacker);
+bool WinnerDecided_G(const HexMatrix& board,const HexAttacker& attacker);
 void MctsWork_G::SimulatedPlayout(
-    const QSharedPointer<MctsNode>& node, HexBoard& virBoard)
+    const QSharedPointer<MctsNode>& node, HexMatrix& virBoard)
 {
     if (WinnerDecided_G(virBoard, nowAttacker))
     {
@@ -157,7 +157,7 @@ void MctsWork_G::SimulatedPlayout(
         // Switch player
         nowAttacker = !nowAttacker;
         // Get valid moves
-        QVector<HexPoint> validMoves = GetValidMoves_G(virBoard);
+        QVector<HexLocation> validMoves = GetValidMoves_G(virBoard);
         // Generate a distribution and choose a move randomly
         static QRandomGenerator random;
         virBoard(validMoves[random.bounded(validMoves.count())], nowAttacker);
@@ -178,9 +178,9 @@ void MctsWork_G::Backpropagate(QSharedPointer<MctsNode>& node)
     }
 }
 
-QVector<HexPoint> GetValidMoves_G(const HexBoard &board)
+QVector<HexLocation> GetValidMoves_G(const HexMatrix &board)
 {
-    QVector<HexPoint> validMoves;
+    QVector<HexLocation> validMoves;
     for (int i = 0, end = board.Order(); i < end; i++)
     {
         for (int j = 0; j < end; j++)
@@ -195,14 +195,14 @@ QVector<HexPoint> GetValidMoves_G(const HexBoard &board)
 }
 
 #include <QStack>
-inline bool WinnerDecided_G(const HexBoard& board,const HexAttacker& attacker)
+inline bool WinnerDecided_G(const HexMatrix& board,const HexAttacker& attacker)
 {
     int num[2] { 0, 0 };
     int &r = num[0];
     int &c = num[1];
-
-    QStack<HexPoint> stack;
-    QVector<HexPoint> visited;
+    
+    QStack<HexLocation> stack;
+    QVector<HexLocation> visited;
     int order = board.Order();
     for (int &p = num[*(!attacker)]; p < order; p++)
     {
@@ -215,7 +215,7 @@ inline bool WinnerDecided_G(const HexBoard& board,const HexAttacker& attacker)
     // dfs
     while (!stack.isEmpty())
     {
-        HexPoint coord = stack.pop();
+        HexLocation coord = stack.pop();
         r = coord.row;
         c = coord.col;
 

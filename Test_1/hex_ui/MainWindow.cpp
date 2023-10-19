@@ -6,6 +6,7 @@
 #include "StartWidget.h"
 #include "HexDock.h"
 
+#include <QScreen>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -20,9 +21,14 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow {parent}
 {
     this->setWindowIconText("HexKing");
-    this->setGeometry(550, 200, 800, 650);
     this->setStyleSheet("font:JetBrains Mono NL");
-    this->setCentralWidget(new StartWidget(this));
+
+    auto startWidget = new StartWidget(this);
+    QSize screenSize = QApplication::primaryScreen()->size();
+    int x = (screenSize.width() - startWidget->width()) >> 1;
+    int y = (screenSize.height() - startWidget->height()) / 3;
+    this->setCentralWidget(startWidget);
+    this->move(x, y);
 
     auto mainMenu = new QAction("Main Menu", this);
     auto restart = new QAction("Restart", this);
@@ -93,7 +99,8 @@ MainWindow::MainWindow(QWidget *parent)
             QMessageBox::Yes | QMessageBox::No
         );
         if (reply == QMessageBox::Yes) {
-            this->setCentralWidget(new ChessBoard(this->order, this->first, this->gmd, this));
+            if (gmd == 3) fcViewCp = funcView->isChecked();
+            InitChess(order, first, gmd);
             logTxt->clear();
         }
     });
@@ -126,7 +133,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(logDock, &HexDock::clickClose, this, [&]() {
         logView->setChecked(false);
     });
-    connect(&hexLog, &HexLog::txt, this, [&](auto str, auto fmt) {
+    connect(&hexLog(), &HexLog::txt, this, [&](auto str, auto fmt) {
         QScrollBar *bar = logTxt->verticalScrollBar();
         int bottom = bar->maximum();
         logTxt->textCursor().insertText(str, fmt);
@@ -135,9 +142,9 @@ MainWindow::MainWindow(QWidget *parent)
             bar->setValue(bar->maximum());
         }
     });
-    connect(&hexLog, &HexLog::plyer, logWidget, &LogWidget::SetStatePlayer);
-    connect(&hexLog, &HexLog::ai, logWidget, &LogWidget::SetStateAI);
-    connect(&hexLog, &HexLog::warning, logWidget, &LogWidget::SetStateWarn);
+    connect(&hexLog(), &HexLog::plyer, logWidget, &LogWidget::SetStatePlayer);
+    connect(&hexLog(), &HexLog::ai, logWidget, &LogWidget::SetStateAI);
+    connect(&hexLog(), &HexLog::warning, logWidget, &LogWidget::SetStateWarn);
 }
 
 void MainWindow::InitChess(int order, int first, int gmd)

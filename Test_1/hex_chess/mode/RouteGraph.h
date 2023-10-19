@@ -2,7 +2,7 @@
 #define ROUTEGRAPH_H
 
 #include <QVector>
-#include "HexPoint.hpp"
+#include "HexLocation.hpp"
 #include "RouteNode.hpp"
 
 class RouteGraph
@@ -14,12 +14,12 @@ public:
     int Push(const int &row, const int &col);
     int PushBack(const int &row, const int &col, const int &pre_index);
     int PushWinner(const int &row, const int &col, const int &pre_index);
-    QVector<HexPoint> WinnerRoute_shortest();
-    QVector<HexPoint> WinnerRoute_all();
-
-    int Push(const HexPoint &coord);
-    int PushBack(const HexPoint &coord, const int &pre_index);
-    int PushWinner(const HexPoint &coord, const int &pre_index);
+    QVector<HexLocation> WinnerRoute_shortest();
+    QVector<HexLocation> WinnerRoute_all();
+    
+    int Push(const HexLocation &coord);
+    int PushBack(const HexLocation &coord, const int &pre_index);
+    int PushWinner(const HexLocation &coord, const int &pre_index);
 
 private:
     QVector<RouteNode*> node;

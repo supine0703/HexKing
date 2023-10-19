@@ -30,7 +30,7 @@ int RouteGraph::PushWinner(const int &row, const int &col, const int &pre_index)
     return winner.count() - 1;
 }
 
-QVector<HexPoint> RouteGraph::WinnerRoute_shortest()
+QVector<HexLocation> RouteGraph::WinnerRoute_shortest()
 {
     Q_ASSERT(winner.count() > 0);
     QSet<QPair<int, int>> shortest;
@@ -48,10 +48,10 @@ QVector<HexPoint> RouteGraph::WinnerRoute_shortest()
         p = p->PreNode();
     }
     while (p != nullptr);
-    return QVector<HexPoint>(shortest.begin(), shortest.end());
+    return QVector<HexLocation>(shortest.begin(), shortest.end());
 }
 
-QVector<HexPoint> RouteGraph::WinnerRoute_all()
+QVector<HexLocation> RouteGraph::WinnerRoute_all()
 {
     Q_ASSERT(winner.count() > 0);
     int count = winner.count();
@@ -66,21 +66,21 @@ QVector<HexPoint> RouteGraph::WinnerRoute_all()
         }
         while (p != nullptr);
     }
-    return QVector<HexPoint>(all.begin(), all.end());
+    return QVector<HexLocation>(all.begin(), all.end());
 }
 
-int RouteGraph::Push(const HexPoint &coord)
+int RouteGraph::Push(const HexLocation &coord)
 {
     return Push(coord.row, coord.col);
 }
 
 
-int RouteGraph::PushBack(const HexPoint &coord, const int &pre_index)
+int RouteGraph::PushBack(const HexLocation &coord, const int &pre_index)
 {
     return PushBack(coord.row, coord.col, pre_index);
 }
 
-int RouteGraph::PushWinner(const HexPoint &coord, const int &pre_index)
+int RouteGraph::PushWinner(const HexLocation &coord, const int &pre_index)
 {
     return PushWinner(coord.row, coord.col, pre_index);
 }

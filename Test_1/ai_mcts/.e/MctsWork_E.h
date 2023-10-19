@@ -3,22 +3,22 @@
 
 #include <QRunnable>
 #include <QSharedPointer>
-#include "HexBoard.hpp"
+#include "HexMatrix.hpp"
 #include "MctsNode.hpp"
 
-QVector<HexPoint> GetValidMoves_E(const HexBoard& board);
+QVector<HexLocation> GetValidMoves_E(const HexMatrix& board);
 
 class MctsWork_E : public QRunnable
 {
 public:
-    MctsWork_E(const QSharedPointer<MctsNode>& child, const HexBoard& board);
+    MctsWork_E(const QSharedPointer<MctsNode>& child, const HexMatrix& board);
     ~MctsWork_E();
     void run() override;
 
 private:
     void SimulatedPlayout();
-
-    HexBoard board;
+    
+    HexMatrix board;
     QSharedPointer<MctsNode> node;
 };
 

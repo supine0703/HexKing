@@ -10,8 +10,8 @@ class GamePvE : public GameMode, private ChooseAI
 public:
     GamePvE(
         bool *end,
-        HexBoard *_board,
-        QVector<HexPoint> *_winner,
+        HexMatrix *_board,
+        QVector<HexLocation> *_winner,
         HexAttacker *_attacker,
         bool isWhite,
         QObject *parent = nullptr

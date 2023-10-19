@@ -9,13 +9,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>850</width>
     <height>650</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>780</width>
+    <width>844</width>
     <height>632</height>
    </size>
   </property>
@@ -350,6 +350,11 @@ QGroupBox::title{
                  <string>Mcts_G</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Test_AI</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>
@@ -385,6 +390,9 @@ QGroupBox::title{
               <widget class="QDoubleSpinBox" name="b_doubleSpin">
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="minimum">
+                <double>0.010000000000000</double>
                </property>
                <property name="maximum">
                 <double>2.000000000000000</double>
@@ -425,6 +433,12 @@ QGroupBox::title{
              </item>
              <item>
               <widget class="QSpinBox" name="b_Time_SpinBox">
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
                <property name="maximum">
                 <number>300</number>
                </property>
@@ -444,11 +458,21 @@ QGroupBox::title{
               <number>9</number>
              </property>
              <property name="rightMargin">
-              <number>9</number>
+              <number>16</number>
              </property>
              <property name="bottomMargin">
               <number>9</number>
              </property>
+             <item>
+              <widget class="QRadioButton" name="b_SingleRadio">
+               <property name="text">
+                <string>Singleton</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QRadioButton" name="b_ParallelizedRadio">
                <property name="text">
@@ -456,16 +480,6 @@ QGroupBox::title{
                </property>
                <property name="checked">
                 <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="b_SingleRadio">
-               <property name="text">
-                <string>Single </string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -533,6 +547,11 @@ QGroupBox::title{
                  <string>Mcts_G</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Test_AI</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>
@@ -566,6 +585,9 @@ QGroupBox::title{
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="w_doubleSpin">
+               <property name="minimum">
+                <double>0.010000000000000</double>
+               </property>
                <property name="maximum">
                 <double>2.000000000000000</double>
                </property>
@@ -605,6 +627,9 @@ QGroupBox::title{
              </item>
              <item>
               <widget class="QSpinBox" name="w_Time_SpinBox">
+               <property name="minimum">
+                <number>1</number>
+               </property>
                <property name="maximum">
                 <number>300</number>
                </property>
@@ -624,11 +649,21 @@ QGroupBox::title{
               <number>9</number>
              </property>
              <property name="rightMargin">
-              <number>9</number>
+              <number>16</number>
              </property>
              <property name="bottomMargin">
               <number>9</number>
              </property>
+             <item>
+              <widget class="QRadioButton" name="w_SingleRadio">
+               <property name="text">
+                <string>Singleton</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
              <item>
               <widget class="QRadioButton" name="w_ParallelizedRadio">
                <property name="text">
@@ -636,16 +671,6 @@ QGroupBox::title{
                </property>
                <property name="checked">
                 <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="w_SingleRadio">
-               <property name="text">
-                <string>Single </string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
                </property>
               </widget>
              </item>

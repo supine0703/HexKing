@@ -1,7 +1,7 @@
 #ifndef HEXLOG_H
 #define HEXLOG_H
 
-#define hexLog HexLog::getHexLog()
+#define hexLog HexLog::getHexLog
 
 #include <QObject>
 

@@ -3,7 +3,7 @@
 #include <QQueue>
 #include "RouteGraph.h"
 
-GameMode::GameMode(bool *end, HexBoard *_board, QVector<HexPoint> *_winner, HexAttacker *_attacker, QObject *parent)
+GameMode::GameMode(bool *end, HexMatrix *_board, QVector<HexLocation> *_winner, HexAttacker *_attacker, QObject *parent)
     : QObject(parent)
     , end(end)
     , board(_board)
@@ -41,7 +41,7 @@ void GameMode::Determine()
 bool GameMode::Outcome()
 {
     Q_ASSERT(end != nullptr && board != nullptr && winnerRoute != nullptr);
-    HexBoard &_board = *board;
+    HexMatrix &_board = *board;
     int order = _board.Order();
     if (_board.PiecesNum() <= (order - 1) << 1)
     {

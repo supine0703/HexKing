@@ -2,8 +2,8 @@
 #define CHESSBOARD_H
 
 #include <QWidget>
-#include "HexPoint.hpp"
-#include "HexBoard.hpp"
+#include "HexLocation.hpp"
+#include "HexMatrix.hpp"
 
 class QPushButton;
 class GameMode;
@@ -80,13 +80,13 @@ private:
 
     QVector<QVector<QPointF>> *points;
     QVector<QPointF> *coordPoints;
-    QVector<HexPoint> *winnerRoute;
+    QVector<HexLocation> *winnerRoute;
     QPainterPath *borderPath_ud; // up and dowm
     QPainterPath *borderPath_lr; // left and right
     QPainterPath *gridPath;
     QPainterPath *winnerPath;
-
-    HexBoard *board;
+    
+    HexMatrix *board;
     GameMode *gameMode;
 
     void UpdatePoints();

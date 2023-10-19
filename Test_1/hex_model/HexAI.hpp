@@ -1,8 +1,8 @@
 #ifndef HEXAI_H
 #define HEXAI_H
 
-#include "HexBoard.hpp"
-#include "HexPoint.hpp"
+#include "HexMatrix.hpp"
+#include "HexLocation.hpp"
 #include <string>
 
 class HexAI
@@ -13,8 +13,8 @@ public:
     HexAI() { }
     virtual ~HexAI() { };
     virtual std::string Name() const = 0;
-    virtual HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) = 0;
     virtual void StopWork() = 0;
+    virtual HexLocation ChooseMove(const HexMatrix& board,  HexAttacker attacker) = 0;
 };
 
 

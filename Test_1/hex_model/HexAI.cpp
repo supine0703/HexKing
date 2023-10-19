@@ -3,6 +3,8 @@
 #include "AI_Mcts_A.h"
 #include "AI_Mcts_E.h"
 #include "AI_Mcts_G.h"
+#include "AI_Mcts_I.h"
+//#include "SgException.hpp"
 
 #include <QFile>
 #include <QTextStream>
@@ -34,6 +36,14 @@ void ChooseAI::choose_ai(int key, HexAI*& black, HexAI*& white)
         case 2:
             ai = new AI_Mcts_G(ecf, time, parallelized);
             break;
+        case 3:
+//            ai = new AI_Mo_I(time);
+            ai = new AI_Mcts_I(ecf, time, parallelized);
+            break;
+        }
+        if (!ai)
+        {
+//            throw SgException("AI Version not Found !");
         }
         return ai;
     };
