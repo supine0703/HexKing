@@ -23,6 +23,7 @@ public:
     void RegretAMove();
     void AddHistory(int row, int col);
     void StopAI();
+    HexLocation GetRegret(int step);
 
     QString dm = "";
 

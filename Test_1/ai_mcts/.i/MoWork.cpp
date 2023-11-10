@@ -103,8 +103,8 @@ void MoWork::Work(QElapsedTimer* time, const HexMatrix &hm,
 void MoWork::InitSearch(HexBoard &brd, HexColor color)
 {
     // Resign if the game is already over
-    Groups groups;
-    GroupBuilder::Build(brd.GetPosition(), groups);
+//    Groups groups;
+//    GroupBuilder::Build(brd.GetPosition(), groups);
     Q_ASSERT(!brd.GetGroups().IsGameOver());
 
     StoneBoard original(brd.GetPosition());

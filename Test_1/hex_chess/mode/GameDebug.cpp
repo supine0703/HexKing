@@ -1,7 +1,8 @@
 #include "GameDebug.h"
 
-#include <HexLog.h>
+#include "HexLog.h"
 #include <QStack>
+#include "ShareData.h"
 
 GameDebug::GameDebug(
     bool *end,
@@ -50,6 +51,7 @@ bool GameDebug::IsPlayer()
 void GameDebug::RegretAMove()
 {
     HexLocation move = history->pop();
+    hisMove().pop_back();
 
     Q_ASSERT((*board)(move) != HexCell::Empty);
     *nowAttacker = !(*nowAttacker);
@@ -66,10 +68,23 @@ void GameDebug::RegretAMove()
 void GameDebug::AddHistory(int row, int col)
 {
     history->push({row, col});
+    hisMove().push_back(row * 11 + col);
 }
 
 void GameDebug::StopAI()
 {
     whiteAI->StopWork();
     blackAI->StopWork();
+}
+
+HexLocation GameDebug::GetRegret(int step)
+{
+    if (history->size() < step)
+    {
+        return {-1, -1};
+    }
+    else
+    {
+        return (*history)[step-1];
+    }
 }

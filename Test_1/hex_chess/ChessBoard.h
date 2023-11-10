@@ -99,6 +99,14 @@ private:
     void PaintProjection();
     void PaintOtherComponents();
 
+    void UpdateValue();
+    void PaintValueInfo();
+    QVector<double> *valueArray1;
+    QVector<double> *valueArray2;
+    double swap = 0, value1 = 0, value2 = 0, other1 = 0, other2 = 0;
+    bool showValue = false;
+
+
     void PlaceChessPieces(int row, int col);
     void ConditionsDetermine();
 
@@ -122,6 +130,7 @@ public slots:
     void ai_demo();
     void demo_stop();
     void regret_a_move();
+
 };
 
 #endif // CHESSBOARD_H

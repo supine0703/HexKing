@@ -46,7 +46,11 @@ void MctsWork_I::run()
         QSharedPointer<MctsNode_I> node = root;
         nowAttacker = !node->Attacker();
         SelectChildPlayout(virBoard, node);
-        ExpandNode(node, virBoard);
+        if (!jumpExpand)
+        {
+            ExpandNode(node, virBoard);
+        }
+        jumpExpand = false;
         SimulatedPlayout(node, virBoard);
         Backpropagate(node);
     }
@@ -97,6 +101,7 @@ void MctsWork_I::SelectChildPlayout(HexMatrix& virBoard, QSharedPointer<MctsNode
         }
         virBoard(node->Move(), node->Attacker());
         nowAttacker = !nowAttacker;
+        if (!maxScore) jumpExpand = true;
     }
 }
 

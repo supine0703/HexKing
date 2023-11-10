@@ -14,6 +14,8 @@
 
 #include "HexLog.h"
 
+//#include "PyInterface.hpp"
+
 #define _BLACK_ QColor(0, 0, 0, 255)
 #define _WHITE_ QColor(255, 255, 255, 255)
 #define _RED_ QColor(234, 67, 53, 255)
@@ -27,13 +29,14 @@
 #define _RADIO 1
 #define _BORDER_RH 0.25
 #define _FONT_NAME "JetBrains Mono NL"
+#define _PUCT_ON_ false
 
 
 ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     : QWidget(parent)
     , order(Order)
     , isPlayer(First)
-    , AIThread(new QThread())
+//    , AIThread(new QThread())
     , bottom(order)
     , right((order << 1) + 1)
     , pointsRows(bottom + 1)
@@ -57,6 +60,8 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     , borderPath_lr(new QPainterPath)
     , gridPath(new QPainterPath)
     , winnerPath(new QPainterPath)
+    , valueArray1(new QVector<double>(121, 0.0))
+    , valueArray2(new QVector<double>(121, 0.0))
 {
     this->setMinimumSize((boardBaseSize * 20).toSize());
     this->setMouseTracking(true);
@@ -74,6 +79,7 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
             hexLog() << hst::plyer;
             PlaceChessPieces(_row, _col);
         });
+        AIThread = new QThread();
         AIThread->start();
         break;
     case _GMode::_EvE:
@@ -84,6 +90,7 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
             hexLog() << hst::plyer;
             PlaceChessPieces(_row, _col);
         });
+        AIThread = new QThread();
         AIThread->start();
         isPlayer = false;
         break;
@@ -99,7 +106,7 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         });
         connect(this, &ChessBoard::setPieces, (GameDebug*)gameMode, &GameDebug::AddHistory);
         connect(this, &ChessBoard::RegretAMove, (GameDebug*)gameMode, &GameDebug::RegretAMove);
-
+        AIThread = new QThread();
         AIThread->start();
         isPlayer = true;
         break;
@@ -107,7 +114,6 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         break;
     }
     gameMode->moveToThread(AIThread);
-
     for (int i = 0; i < order; i++)
     {
         coord_char->push_back(QChar(i+65));
@@ -131,38 +137,33 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         });
     }
 
-    if (debug)
-    {
-//        Test = new QPushButton("AI move", this);
-//        Test->setGeometry(0, 0, 160, 80);
-//        Test->setFont(QFont(fontName, 24));
-//        connect(Test, &QPushButton::clicked, this, [=]() {
-//            if (!ai_is_working) {
-//                ai_is_working = true;
-//                emit AIWorking();
-//            }
-//            else qDebug() << "ai is working";
+
+//    if (debug && order == 11 && _PUCT_ON_)
+//    {
+//        showValue = true;
+//        QPushButton *uv = new QPushButton("update value", this);
+//        uv->setFont(QFont(_FONT_NAME));
+//        uv->move(0, 100);
+//        connect(uv, &QPushButton::clicked, this, [this]() {
+//            static int i = 0;
+//            qDebug() << i++;
+//            if (i == 120) i = 0;
+//            UpdateValue();
+//            update();
 //        });
-
-
-//        Test = new QPushButton("Regret a move", this);
-//        Test->setGeometry(0, 100, 160, 80);
-//        Test->setFont(QFont(fontName, 24));
-//        connect(Test, &QPushButton::clicked, this, [=]() {
-//            if (!board->PiecesNum()) { qDebug() << "board is empty"; return; }
-//            if (!ai_is_working) {
-//                ai_is_working = true;
-//                emit RegretAMove();
-//            }
-//            else qDebug() << "ai is working";
-//        });
-
-
-    }
+//        model_init();
+//    }
 }
 
 ChessBoard::~ChessBoard()
 {
+
+//    if (debug && order == 11 && _PUCT_ON_)
+//    {
+//        model_closes();
+//    }
+
+
     delete gameMode;
     AIThread->exit();
     AIThread->wait();
@@ -218,6 +219,10 @@ void ChessBoard::paintEvent(QPaintEvent *event)
         PaintProjection();
     }
     PaintOtherComponents();
+    if (showValue)
+    {
+        PaintValueInfo();
+    }
 }
 
 void ChessBoard::mouseMoveEvent(QMouseEvent *event)
@@ -455,6 +460,45 @@ void ChessBoard::PaintPiecesPlaced()
     QPainter painter(this);
     painter.setPen(QPen(Qt::transparent, 0));
     QPointF add(gridWidth, 0);
+
+    if (showValue)
+    {
+        double max1 = 0, max2 = 0;
+        int _r1 = -1, _r2 = -1, _c1 = -1, _c2 = -1;
+        for (int i = 0; i < 121; i++)
+        {
+            if ((*valueArray1)[i] > max1 && (*board)(i) == HexCell::Empty)
+            {
+                _r1 = i / 11;
+                _c1 = i % 11;
+                max1 = (*valueArray1)[i];
+            }
+            if ((*valueArray2)[i] > max2 && (*board)(i) == HexCell::Empty)
+            {
+                _r2 = i / 11;
+                _c2 = i % 11;
+                max2 = (*valueArray2)[i];
+            }
+        }
+
+        if (_r1 != -1)
+        {
+            painter.setBrush(_YELLOW_);
+            painter.drawEllipse(
+                (((*points)[_r1][1] + (*points)[_r1+1][2]) / 2) + add * _c1,
+                radius_dotted, radius_dotted
+            );
+        }
+        if (_r2 != -1)
+        {
+            painter.setBrush(_YELLOW_);
+            painter.drawEllipse(
+                (((*points)[_r2][1] + (*points)[_r2+1][2]) / 2) + add * _c2,
+                radius_dotted, radius_dotted
+            );
+        }
+    }
+
     QBrush *_c[2]{black, white};
     for (int i = 0; i < order; i++)
     {
@@ -464,10 +508,8 @@ void ChessBoard::PaintPiecesPlaced()
             if (board->GetCell(i, j) != HexCell::Empty)
             {
                 painter.setBrush(*_c[static_cast<int>(board->GetCell(i, j))]);
-//                painter.setBrush((*pieces)[i][j] != _Piece::First ? *second : *first);
                 painter.drawEllipse(centre + add * j, radius_solid, radius_solid);
             }
-//            centre += add;
         }
     }
     painter.end(); // end
@@ -507,6 +549,86 @@ void ChessBoard::PaintOtherComponents()
     painter.drawText(coord_label_p2,
         QString("col: ") +(coord_col == ' ' ? "" : QString::number(coord_col))
     );
+    painter.end(); // end
+}
+
+
+void ChessBoard::UpdateValue()
+{
+
+//    QVector<double> values = BoardToNP(
+//        *board,
+//        static_cast<GameDebug*>(gameMode)->GetRegret(1),
+//        static_cast<GameDebug*>(gameMode)->GetRegret(2),
+//        attacker
+//    );
+//    value1 = values[0];
+//    value2 = values[1];
+//    for (int i = 0; i < 121; i++)
+//    {
+//        (*valueArray1)[i] = values[i+2];
+//        (*valueArray2)[i] = values[i+124];
+//    }
+//    swap = values[245];
+//    other1 = values[123];
+//    other2 = values[246];
+}
+
+void ChessBoard::PaintValueInfo()
+{
+    QPainter painter(this);
+    painter.setFont(coord_f1);
+    painter.setPen(_BLACK_);
+    for (int row = 0; row < order; row++)
+    {
+        for (int col = 0; col < order; col++)
+        {
+            painter.setPen(black->color());
+            painter.drawText(
+                (*points)[row + 1][col << 1] + QPointF(gridWidth/8, gridHeight/20),
+                QString("%1").arg(
+                    static_cast<int>((*valueArray1)[row*order+col] * 1000),
+                    3, 10, QChar('0')
+                )
+            );
+            painter.setPen(white->color());
+            painter.drawText(
+                (*points)[row + 1][col << 1] + QPointF(gridWidth/8, -gridHeight/3),
+                QString("%1").arg(
+                    static_cast<int>((*valueArray2)[row*order+col] * 1000),
+                    3, 10, QChar('0')
+                )
+            );
+        }
+    }
+    painter.setPen(white->color());
+    painter.drawText(
+        coord_label_p1 + QPointF(0, -gridHeight * 3),
+//        QString("0.%1").arg(static_cast<int>(swap * 100), 4, 10, QChar('0'))
+        QString("swap: %1").arg(swap, 0, 'f', 5)
+    );
+    painter.drawText(
+        coord_label_p1 + QPointF(0, -gridHeight),
+//        QString("0.%1").arg(static_cast<int>(value2 * 100), 4, 10, QChar('0'))
+        QString("value2: %1").arg(value2, 0, 'f', 5)
+    );
+    painter.drawText(
+        coord_label_p1 + QPointF(0, -gridHeight * 2),
+//        QString("0.%1").arg(static_cast<int>(other2 * 100), 4, 10, QChar('0'))
+        QString("other2: %1").arg(other2, 0, 'f', 5)
+    );
+    painter.setPen(black->color());
+    painter.drawText(
+        coord_label_p1 + QPointF(0, -gridHeight * 1.5),
+//        QString("0.%1").arg(static_cast<int>(value1 * 100), 4, 10, QChar('0'))
+        QString("value1: %1").arg(value1, 0, 'f', 5)
+    );
+    painter.drawText(
+        coord_label_p1 + QPointF(0, -gridHeight * 2.5),
+//        QString("0.%1").arg(static_cast<int>(other1 * 100), 4, 10, QChar('0'))
+        QString("other1: %1").arg(other1, 0, 'f', 5)
+    );
+
     painter.end(); // end
 }
 

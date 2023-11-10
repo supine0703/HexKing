@@ -40,6 +40,8 @@ private:
     const double ecf;
     HexAttacker nowAttacker;
     MoWork& m_mow;
+
+    bool jumpExpand = false;
 };
 
 #endif // MCTSWORK_I_H

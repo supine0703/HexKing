@@ -12,6 +12,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+set(Python3_INCLUDE_DIRS "E:/Tools/anaconda3/envs/py311/include")
+set(Python3_LIBRARIES "E:/Tools/anaconda3/envs/py311/libs/python311.lib")
+
+include_directories(${Python3_INCLUDE_DIRS})
+
 set(pkgdatadir ${CMAKE_CURRENT_SOURCE_DIR}/share)
 set(top_srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions(
@@ -36,6 +41,7 @@ include_directories(
     ai_mcts/.e
     ai_mcts/.g
     ai_mcts/.i
+    ai_mcts/.puct
 )
 
 set(UI
@@ -130,7 +136,16 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
         ai_mcts/.i/MoWork.h ai_mcts/.i/MoWork.cpp
         ai_mcts/.i/MctsNode_I.hpp
-
+        ai_mcts/.puct/PuctNode.hpp ai_mcts/.puct/PuctNode.cpp
+        ai_mcts/.puct/nn.hpp
+        ai_mcts/.puct/Mcts_puct.hpp ai_mcts/.puct/Mcts_puct.cpp
+        ai_mcts/.puct/AI_Mcts_K.h ai_mcts/.puct/AI_Mcts_K.cpp
+        hex_model/PyInterface.hpp
+        ai_mcts/.puct/AI_AlphaZero.hpp ai_mcts/.puct/AI_AlphaZero.cpp
+        ai_mcts/.puct/Py_Mcts.hpp
+        ai_mcts/.puct/Py_Mcts.cpp
+        ai_mcts/.puct/ShareData.h
+        ai_mcts/.puct/PyThreadStateLock.hpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Test_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -149,10 +164,15 @@ else()
         )
     endif()
 endif()
-target_compile_definitions(Test_1
-    PRIVATE CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/share/config.txt"
+target_compile_definitions(Test_1 PRIVATE
+    CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/share/config.txt"
+    PY_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py"
+    AZA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py/azalea"
 )
-target_link_libraries(Test_1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Test_1 PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    ${Python3_LIBRARIES}
+)
 target_link_libraries(Test_1 PUBLIC
     mohex
 )

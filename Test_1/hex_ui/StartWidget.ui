@@ -355,6 +355,11 @@ QGroupBox::title{
                  <string>Test_AI</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Py_Mcts</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>
@@ -550,6 +555,11 @@ QGroupBox::title{
                <item>
                 <property name="text">
                  <string>Test_AI</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Py_Mcts</string>
                 </property>
                </item>
               </widget>

@@ -4,6 +4,7 @@
 #include "AI_Mcts_E.h"
 #include "AI_Mcts_G.h"
 #include "AI_Mcts_I.h"
+#include "Py_Mcts.hpp"
 //#include "SgException.hpp"
 
 #include <QFile>
@@ -40,6 +41,8 @@ void ChooseAI::choose_ai(int key, HexAI*& black, HexAI*& white)
 //            ai = new AI_Mo_I(time);
             ai = new AI_Mcts_I(ecf, time, parallelized);
             break;
+        case 4:
+            ai = new PyMcts(parallelized);
         }
         if (!ai)
         {
@@ -47,6 +50,12 @@ void ChooseAI::choose_ai(int key, HexAI*& black, HexAI*& white)
         }
         return ai;
     };
+
+//    if (key == 3 && data[7].toInt() == 4 && data[3].toInt() == 4)
+//    {
+//        black = _createAI(data[3].toInt(), data[4].toDouble(), data[5].toInt(), data[6].toInt());
+//        white = black;
+//    }
 
     if (key & 1)
     {
