@@ -1,4 +1,4 @@
-#include "MoWork.h"
+#include "PMoWork.h"
 
 #include <QElapsedTimer>
 #include "Decompositions.hpp"
@@ -9,9 +9,9 @@
 #include "HexLog.h"
 #include "HexState.hpp"
 #include "Resistance.hpp"
-#include "qdebug.h"
+#include <QDebug>
 
-MoWork::MoWork(const uint &runTime)
+PMoWork::PMoWork(const uint &runTime)
     : en(new HexEnvironment(11, 11))
     , brd(new StoneBoard(11))
     , runTime(runTime)
@@ -19,15 +19,14 @@ MoWork::MoWork(const uint &runTime)
     Decompositions::Initialize();
 }
 
-MoWork::~MoWork()
+PMoWork::~PMoWork()
 {
     delete en;
     delete brd;
 }
 
-void MoWork::Work(QElapsedTimer* time, const HexMatrix &hm,
-                  const HexAttacker &attacker,
-                  QVector<HexLocation> &moves)
+HexLocation PMoWork::Work(QElapsedTimer* time, const HexMatrix &hm,
+                  const HexAttacker &attacker)
 {
     usedTime = time;
     en->NewGame(11, 11);
@@ -51,7 +50,7 @@ void MoWork::Work(QElapsedTimer* time, const HexMatrix &hm,
     HexColor color = static_cast<HexColor>(attacker);
     HexState state(*brd, color);
 
-//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
     HexPoint move = INVALID_POINT;
 
@@ -70,41 +69,31 @@ void MoWork::Work(QElapsedTimer* time, const HexMatrix &hm,
     {
         int r, c;
         HexPointUtil::pointToCoords(move, c, r);
-        moves.push_back(HexLocation(r, c));
-        return;
+        qDebug() << "Best move:" << HexLocation(r, c).Str() << Qt::endl;
+        return HexLocation(r, c);
     }
 
-    qDebug() << "Best move cannot be determined, must search state.\n";
+    qDebug() << "Best move cannot be determined, must search state.";
 
     PointSequence winningSequence;
     bool win = PerformPreSearch(hexbrd, color, consider, winningSequence);
-    qDebug() << "must win? " << win;
+    qDebug() << "must win? " << win << Qt::endl;
+    usedTime = nullptr;
     if (win)
     {
         int r, c;
         HexPointUtil::pointToCoords(winningSequence[0], c, r);
-        moves.push_back(HexLocation(r, c));
-        return;
+        qDebug() << "win move:" << HexLocation(r, c).Str() << Qt::endl;
+        return HexLocation(r, c);
     }
-    else
-    {
-        for (BitsetIterator b(consider); b; ++b)
-        {
-            Q_ASSERT(*b >= FIRST_CELL && *b <= FIRST_INVALID);
-            int r, c;
-            HexPointUtil::pointToCoords(*b, c, r);
-            moves.push_back(HexLocation(r, c));
-        }
-    }
-    usedTime = nullptr;
-    Q_ASSERT(moves.count() != 0);
+    return HexLocation(100,100);
 }
 
-void MoWork::InitSearch(HexBoard &brd, HexColor color)
+void PMoWork::InitSearch(HexBoard &brd, HexColor color)
 {
     // Resign if the game is already over
-//    Groups groups;
-//    GroupBuilder::Build(brd.GetPosition(), groups);
+    //    Groups groups;
+    //    GroupBuilder::Build(brd.GetPosition(), groups);
     Q_ASSERT(!brd.GetGroups().IsGameOver());
 
     StoneBoard original(brd.GetPosition());
@@ -122,7 +111,7 @@ void MoWork::InitSearch(HexBoard &brd, HexColor color)
     }
 }
 
-HexPoint MoWork::CheckEndgame(
+HexPoint PMoWork::CheckEndgame(
     HexBoard &brd, HexColor color, bitset_t &consider, double &score)
 {
     if (EndgameUtil::IsDeterminedState(brd, color, score))
@@ -130,13 +119,17 @@ HexPoint MoWork::CheckEndgame(
         HexPoint move = EndgameUtil::PlayDeterminedState(brd, color);
         if (EndgameUtil::IsWonGame(brd, color))
         {
-            hexLog() << "Winning!" << HexPointUtil::ToString(move)
+            int r, c;
+            HexPointUtil::pointToCoords(move, c, r);
+            hexLog() << "Winning! " << HexLocation(r, c).Str()
                      << (color ? hlg::wdl : hlg::bdl);
         }
         else
         {
-            hexLog() << "Opponent has won; playing most blocking move!"
-                     << HexPointUtil::ToString(move)
+            int r, c;
+            HexPointUtil::pointToCoords(move, c, r);
+            hexLog() << "Opponent has won; playing most blocking move! "
+                     << HexLocation(r, c).Str()
                      << (color ? hlg::wdl : hlg::bdl);
         }
         return move;
@@ -151,20 +144,22 @@ HexPoint MoWork::CheckEndgame(
     {
         HexPoint move = static_cast<HexPoint>
             (BitsetUtil::FindSetBit(consider));
+        int r, c;
+        HexPointUtil::pointToCoords(move, c, r);
         hexLog() << "Mustplay is singleton!\n"
-                 << HexPointUtil::ToString(move)
+                 << HexLocation(r, c).Str()
                  << (color ? hlg::wdl : hlg::bdl);
-        qDebug() << "Mustplay is singleton!\n";
+        qDebug() << "Mustplay is singleton!";
         return move;
     }
     return INVALID_POINT;
 }
 
-void SortConsiderSet(const bitset_t& consider, const Resistance& resist,
+void PSortConsiderSet(const bitset_t& consider, const Resistance& resist,
                      std::vector<HexPoint>& moves);
-bool MoWork::PerformPreSearch(HexBoard& brd, HexColor color,
-                               bitset_t& consider,
-                               PointSequence& winningSequence)
+bool PMoWork::PerformPreSearch(HexBoard& brd, HexColor color,
+                              bitset_t& consider,
+                              PointSequence& winningSequence)
 {
     bitset_t losing;
     HexColor other = !color;
@@ -173,7 +168,7 @@ bool MoWork::PerformPreSearch(HexBoard& brd, HexColor color,
     Resistance resist;
     resist.Evaluate(brd);
     std::vector<HexPoint> moves;
-    SortConsiderSet(consider, resist, moves);
+    PSortConsiderSet(consider, resist, moves);
 
     for (size_t i = 0; i < moves.size() && !foundWin; ++i)
     {
@@ -200,14 +195,16 @@ bool MoWork::PerformPreSearch(HexBoard& brd, HexColor color,
     // Abort if we found a one-move win
     if (foundWin)
     {
+        int r, c;
+        HexPointUtil::pointToCoords(winningSequence[0], c, r);
         hexLog() << "Winning :"
-                 << HexPointUtil::ToString(winningSequence[1])
-                 << (color ? hlg::wdl : hlg::bdl);;
+                 << HexLocation(r, c).Str()
+                 << (color ? hlg::wdl : hlg::bdl);
         return true;
     }
     else
     {
-        qDebug() << "not Found win";
+        hexLog() << "not Found win" << (color ? hlg::wdl : hlg::bdl);
     }
 
     // Backing up cannot cause this to happen, right?
@@ -216,14 +213,16 @@ bool MoWork::PerformPreSearch(HexBoard& brd, HexColor color,
     //    if (m_backup_ice_info)
     {
         bitset_t new_consider = EndgameUtil::MovesToConsider(brd, color);
+//        qDebug() << "Moves to consider for " << (color ? "white" : "black")
+//                 << ":" << brd.Write(new_consider).c_str() << '\n';
         // We cannot intersect with the previous consider as there is a
         // risk that not the same choices were made concerning cycles
         // (among other issues)
         if (new_consider.count() < consider.count())
         {
             consider = new_consider;
-            qDebug() << "$$$$$$ new moves to prune $$$$$$"
-                     << brd.Write(consider).c_str() << '\n';
+//            qDebug() << "$$$$$$ new moves to prune $$$$$$"
+//                     << brd.Write(consider).c_str() << '\n';
         }
     }
 
@@ -247,8 +246,8 @@ bool MoWork::PerformPreSearch(HexBoard& brd, HexColor color,
     return false;
 }
 
-inline void SortConsiderSet(const bitset_t& consider, const Resistance& resist,
-                     std::vector<HexPoint>& moves)
+inline void PSortConsiderSet(const bitset_t& consider, const Resistance& resist,
+                            std::vector<HexPoint>& moves)
 {
     std::vector<std::pair<HexEval, HexPoint> > mvsc;
     for (BitsetIterator it(consider); it; ++it)
@@ -259,4 +258,3 @@ inline void SortConsiderSet(const bitset_t& consider, const Resistance& resist,
     for (std::size_t i = 0; i < mvsc.size(); ++i)
         moves.push_back(mvsc[i].second);
 }
-

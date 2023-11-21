@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <cstdint>
+#include <QString>
 
 class HexLocation
 {
@@ -16,6 +17,14 @@ public:
     inline constexpr bool operator!=(const HexLocation& other) const
     {
         return (row != other.row) || (col != other.col);
+    }
+    inline QString Str()
+    {
+        return QString("(") + static_cast<char>(col+65) + ", " + QString::number(11-row) + ")";
+    }
+    inline int Int(int order)
+    {
+        return order * row + col;
     }
     uint8_t row;
     uint8_t col;

@@ -29,8 +29,9 @@ private:
     bool first;
     int order;
     int gmd;
-signals:
 
+private slots:
+    void SaveHexGame(bool winner);
 };
 
 #endif // MAINWINDOW_H

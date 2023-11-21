@@ -8,6 +8,8 @@
 class QPushButton;
 class GameMode;
 class QThread;
+class HexTimer;
+class QLabel;
 
 using gmode_t = char;
 enum class _GMode : gmode_t
@@ -27,10 +29,23 @@ public:
     ~ChessBoard();
 
 private:
+    bool quick = false;
+    bool quickAttacker = 0;
+    bool initFinished = false;
+    bool readyExit = false;
     bool demo = false;
     bool debug = false;
     bool ai_is_working = false;
     QPushButton *Test;
+
+
+    QTimer* myTimer;
+    HexTimer* blackTimer;
+    HexTimer* whiteTimer;
+    QLabel* timerLabel1;
+    QLabel* timerLabel2;
+    bool afterWorking = 0;
+
 
     QThread *AIThread;
     HexAttacker attacker = HexAttacker::Black; // black always play first
@@ -79,7 +94,8 @@ private:
 
 
     QVector<QVector<QPointF>> *points;
-    QVector<QPointF> *coordPoints;
+    QVector<QPointF> *coordPoints1;
+    QVector<QPointF> *coordPoints2;
     QVector<HexLocation> *winnerRoute;
     QPainterPath *borderPath_ud; // up and dowm
     QPainterPath *borderPath_lr; // left and right
@@ -99,17 +115,11 @@ private:
     void PaintProjection();
     void PaintOtherComponents();
 
-    void UpdateValue();
-    void PaintValueInfo();
-    QVector<double> *valueArray1;
-    QVector<double> *valueArray2;
-    double swap = 0, value1 = 0, value2 = 0, other1 = 0, other2 = 0;
-    bool showValue = false;
-
 
     void PlaceChessPieces(int row, int col);
     void ConditionsDetermine();
 
+    void StartTime();
 
 // QWidget interface
 protected:
@@ -123,13 +133,18 @@ signals:
     void setPieces(int row, int col);
     void AIWorking();
     void RegretAMove();
+    void isExit();
+    void needInit();
+    void GameOver(bool);
 
 public slots:
+    void ai_quick(bool c);
     void ai_move();
     void ai_stop();
     void ai_demo();
     void demo_stop();
     void regret_a_move();
+    void need_init();
 
 };
 

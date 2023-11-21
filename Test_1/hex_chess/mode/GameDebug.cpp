@@ -28,18 +28,18 @@ void GameDebug::AIWork()
     if (*(*nowAttacker))
     {
         hexLog() << dm << whiteAI->Name() << hst::whtai;
-        auto [row, col] = whiteAI->ChooseMove(*board, *nowAttacker);
+        auto move = whiteAI->ChooseMove(*board, *nowAttacker);
         hexLog() << whiteAI->Name() << "placed" << "white"
-               << "(" << row << "," << col << ")" << hlg::wdl << hlg::ln;
-        emit placeChess(row, col);
+                 << move.Str() << hlg::wdl << hlg::ln;
+        emit placeChess(move.row, move.col);
     }
     else
     {
         hexLog() << dm << blackAI->Name() << hst::blkai;
-        auto [row, col] = blackAI->ChooseMove(*board, *nowAttacker);
+        auto move = blackAI->ChooseMove(*board, *nowAttacker);
         hexLog() << blackAI->Name() << "placed" << "black"
-               << "(" << row << "," << col << ")" << hlg::bdl << hlg::ln;
-        emit placeChess(row, col);
+                 << move.Str() << hlg::bdl << hlg::ln;
+        emit placeChess(move.row, move.col);
     }
 }
 
@@ -54,9 +54,8 @@ void GameDebug::RegretAMove()
     hisMove().pop_back();
 
     Q_ASSERT((*board)(move) != HexCell::Empty);
-    *nowAttacker = !(*nowAttacker);
     hexLog() << "Regret a move" << (*(*nowAttacker) ? "White" : "Black")
-           <<"(" << move.row << "," << move.col << ")"
+           << move.Str()
            << (*nowAttacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
     (*board)(move, HexCell::Empty);
 
@@ -87,4 +86,18 @@ HexLocation GameDebug::GetRegret(int step)
     {
         return (*history)[step-1];
     }
+}
+
+void GameDebug::Exit()
+{
+    blackAI->Exit();
+    whiteAI->Exit();
+    rdy() = true;
+}
+
+void GameDebug::Init()
+{
+    blackAI->Init();
+    whiteAI->Init();
+    emit placeChess(250, 0);
 }

@@ -36,7 +36,10 @@ void LogWidget::SetStateAI(bool attacker, QString owner)
     warn = false;
     atc = attacker;
     ui->stateLabel->setText(owner + state2);
-    ui->stateLabel->setStyleSheet("font: 600 italic 16pt \"JetBrains Mono\";\n"+stateColor[atc]);
+    ui->stateLabel->setStyleSheet(
+        "font: 600 italic 16pt \"JetBrains Mono\";\n"+
+        stateColor[atc]
+    );
 }
 
 void LogWidget::SetStateWarn()

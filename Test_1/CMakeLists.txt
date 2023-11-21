@@ -139,13 +139,17 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ai_mcts/.puct/PuctNode.hpp ai_mcts/.puct/PuctNode.cpp
         ai_mcts/.puct/nn.hpp
         ai_mcts/.puct/Mcts_puct.hpp ai_mcts/.puct/Mcts_puct.cpp
-        ai_mcts/.puct/AI_Mcts_K.h ai_mcts/.puct/AI_Mcts_K.cpp
-        hex_model/PyInterface.hpp
+
+
         ai_mcts/.puct/AI_AlphaZero.hpp ai_mcts/.puct/AI_AlphaZero.cpp
         ai_mcts/.puct/Py_Mcts.hpp
         ai_mcts/.puct/Py_Mcts.cpp
         ai_mcts/.puct/ShareData.h
         ai_mcts/.puct/PyThreadStateLock.hpp
+        hex_ui/HexTimer.h hex_ui/HexTimer.cpp
+        hex_ui/GameRecord.h hex_ui/GameRecord.cpp
+        hex_ui/RecordDialog.h hex_ui/RecordDialog.cpp hex_ui/RecordDialog.ui
+        ai_mcts/.puct/PMoWork.h ai_mcts/.puct/PMoWork.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Test_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -167,7 +171,9 @@ endif()
 target_compile_definitions(Test_1 PRIVATE
     CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/share/config.txt"
     PY_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py"
-    AZA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py/azalea"
+    AZA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py/battle"
+    PY_WORK_TXT="${CMAKE_CURRENT_BINARY_DIR}/working.txt"
+    RECORDS_HOME="${CMAKE_CURRENT_SOURCE_DIR}/game_records"
 )
 target_link_libraries(Test_1 PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets

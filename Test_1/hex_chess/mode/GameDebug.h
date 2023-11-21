@@ -7,7 +7,6 @@
 
 class GameDebug : public GameMode, private ChooseAI
 {
-
 public:
     GameDebug(
         bool *end,
@@ -34,6 +33,9 @@ private:
     
     QStack<HexLocation>* history;
 
+public:
+    void Exit() override;
+    void Init();
 };
 
 #endif // GAMEDEBUG_H

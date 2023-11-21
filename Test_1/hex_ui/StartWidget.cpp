@@ -14,27 +14,32 @@ StartWidget::StartWidget(QWidget *parent)
     QFile file(CONFIG_FILE);
     if (!file.open(QIODevice::ReadOnly))
     {
-        Q_ASSERT(false);
+        qDebug() << "not found start's config file";
     }
-    QTextStream in(&file);
-    QString line = in.readLine();
-    auto data = line.split(" ");
-    file.close();
+    else
+    {
+        QTextStream in(&file);
+        QString line = in.readLine();
+        auto data = line.split(" ");
+        file.close();
 
-    ui->orderComboBox->setCurrentIndex(data[0].toInt() - 5);
-    ui->modeComboBox->setCurrentIndex(data[1].toInt());
-    ui->BlackRadio->setChecked(data[2].toInt());
-    ui->WhiteRadio->setChecked(!data[2].toInt());
-    ui->b_versionCombo->setCurrentIndex(data[3].toInt());
-    ui->b_doubleSpin->setValue(data[4].toDouble());
-    ui->b_Time_SpinBox->setValue(data[5].toInt());
-    ui->b_ParallelizedRadio->setChecked(data[6].toInt());
-    ui->b_SingleRadio->setChecked(!data[6].toInt());
-    ui->w_versionCombo->setCurrentIndex(data[7].toInt());
-    ui->w_doubleSpin->setValue(data[8].toDouble());
-    ui->w_Time_SpinBox->setValue(data[9].toInt());
-    ui->w_ParallelizedRadio->setChecked(data[10].toInt());
-    ui->w_SingleRadio->setChecked(!data[10].toInt());
+        ui->orderComboBox->setCurrentIndex(data[0].toInt() - 5);
+        ui->modeComboBox->setCurrentIndex(data[1].toInt());
+        ui->BlackRadio->setChecked(data[2].toInt());
+        ui->WhiteRadio->setChecked(!data[2].toInt());
+        ui->b_versionCombo->setCurrentIndex(data[3].toInt());
+        ui->b_doubleSpin->setValue(data[4].toDouble());
+        ui->b_Time_SpinBox->setValue(data[5].toInt());
+        ui->b_ParallelizedRadio->setChecked(data[6].toInt());
+        ui->b_SingleRadio->setChecked(!data[6].toInt());
+        ui->w_versionCombo->setCurrentIndex(data[7].toInt());
+        ui->w_doubleSpin->setValue(data[8].toDouble());
+        ui->w_Time_SpinBox->setValue(data[9].toInt());
+        ui->w_ParallelizedRadio->setChecked(data[10].toInt());
+        ui->w_SingleRadio->setChecked(!data[10].toInt());
+        if (data[2].toInt()) on_BlackRadio_clicked();
+        else on_WhiteRadio_clicked();
+    }
 }
 
 StartWidget::~StartWidget()

@@ -4,7 +4,7 @@
 #include "HexAI.hpp"
 
 class QElapsedTimer;
-class MoWork;
+class PMoWork;
 
 class PyMcts : public HexAI
 {
@@ -12,7 +12,9 @@ public:
     PyMcts(bool useMo = false);
     ~PyMcts() override;
     std::string Name() const override { return "PY_MCTS"; }
-    void StopWork() override { };
+    void StopWork() override;
+    void Exit() override;
+    void Init() override;
 
     HexLocation ChooseMove(const HexMatrix &board, HexAttacker attacker) override;
 
@@ -20,8 +22,10 @@ private:
     const bool useMo;
     QElapsedTimer* usedTime = nullptr;
     uint64_t totalTime = 0;
-    MoWork* mow;
+    PMoWork* mow;
 
+    bool isExit = false;
+    uint runTime = 5000;
 
     void init();
 };

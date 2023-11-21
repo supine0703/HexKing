@@ -1,11 +1,14 @@
 #include "Py_Mcts.hpp"
-#include "MoWork.h"
+#include "PMoWork.h"
 
 #include <QElapsedTimer>
 #include <QVector>
+#include <QFile>
+#include <QThread>
 #include "HexLog.h"
 
 #include "PyThreadStateLock.hpp"
+PYTHREADSTATELOCK_H
 static PyObject* pyAction = nullptr;
 #include "ShareData.h"
 
@@ -14,45 +17,79 @@ PyMcts::PyMcts(bool useMo)
 {
     if (useMo)
     {
-        mow = new MoWork(5000);
+        mow = new PMoWork(runTime);
     }
 }
 
 PyMcts::~PyMcts()
 {
-
-    PyThreadStateLock PyThreadLock;
-    pyAction = nullptr;
-    Py_Finalize();
+    if (useMo)
+    {
+        delete mow;
+    }
+    //    isExit = true;
 }
 
-HexLocation PyMcts::ChooseMove(const HexMatrix &board, HexAttacker attacker)
+void PyMcts::StopWork()
 {
+    QFile file(PY_WORK_TXT);
+    // python will crash if delete file too fast so that search no finish
+    if (file.exists())
+    {
+        QThread::msleep(10);
+        file.remove();
+    }
+    else
+    {
+        while (!file.exists() && usedTime && usedTime->elapsed() < 5000)
+            QThread::msleep(100);
+        if (file.exists())
+        {
+            QThread::msleep(500);
+            file.remove();
+        }
+    }
+}
 
-//    class PyThreadStateLock PyThreadLock;
-    static bool needInit = true;
+static bool needInit = true;
+
+void PyMcts::Exit()
+{
+    if (!needInit)
+    {
+        Py_Finalize();
+        needInit = true;
+    }
+    //    qDebug() << "End";
+}
+
+void PyMcts::Init()
+{
     if (needInit)
     {
         init();
         needInit = false;
     }
+}
 
-//    qDebug() << pyAction;
-
+HexLocation PyMcts::ChooseMove(const HexMatrix &board, HexAttacker attacker)
+{
     usedTime = new QElapsedTimer();
     usedTime->start();
-    if (useMo)
+    if (useMo && hisMove().size() > 12)
     {
-        QVector<HexLocation> moves;
-        mow->Work(usedTime, board, attacker, moves);
-        hexLog() << "VCs used time:" << usedTime->elapsed()
-                 << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
-        if (moves.count() == 1)
+        auto move = mow->Work(usedTime, board, attacker);
+        hexLog() << "VCs used time:" << usedTime->elapsed();
+        if (move.row != 100)
         {
+            int64_t usedT = usedTime->elapsed();
+            hexLog() << "| total time:" << (totalTime+=usedT)
+                     << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
             delete usedTime;
             usedTime = nullptr;
-            return moves[0];
+            return move;
         }
+        else hexLog() << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
     }
 
     int end = qMin(his().size(), hisMove().size());
@@ -98,7 +135,8 @@ HexLocation PyMcts::ChooseMove(const HexMatrix &board, HexAttacker attacker)
     PyArg_Parse(res, "i", &result);
     his().push_back(result);
     result--;
-    int r = result/11, c = result%11;
+    int r = result / 11;
+    int c = result % 11;
 
 //    qDebug() << result;
 
@@ -113,6 +151,13 @@ HexLocation PyMcts::ChooseMove(const HexMatrix &board, HexAttacker attacker)
 
 //    Py_DECREF(res);
 //    qDebug() << pyAction;
+
+    if (isExit)
+    {
+        qDebug() << "2";
+        Exit();
+        isExit = false;
+    }
 
     return HexLocation(r, c);
 }
@@ -133,5 +178,5 @@ void PyMcts::init()
     Q_ASSERT(pInstance);
     pyAction = PyObject_GetAttrString(pInstance, "action");
     Q_ASSERT(pyAction);
-    qDebug() << "SSS";
+//    qDebug() << "SSS";
 }

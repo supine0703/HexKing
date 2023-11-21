@@ -28,6 +28,7 @@ public:
     virtual void AIWork();
     virtual void Determine();
     virtual bool IsPlayer() = 0;
+    virtual void Exit() { }
 
 private:
     bool Outcome();

@@ -39,13 +39,8 @@ HexPointData::HexPointData()
         {
             char buff[32];
             HexPoint p = HexPointUtil::coordsToPoint(x, y);
-#if 0
             sprintf(buff, "%c%d", 'a' + x, y+1);
             name[p] = std::string(buff);
-#else
-            sprintf(buff, "%c%d", 'A'+y, x);
-            name[p] = std::string(buff);
-#endif
         }
     }
 }

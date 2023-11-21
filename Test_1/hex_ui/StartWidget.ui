@@ -293,6 +293,9 @@ QGroupBox::title{
         </property>
         <item>
          <widget class="QGroupBox" name="blackAIGroup">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Black AI</string>
           </property>

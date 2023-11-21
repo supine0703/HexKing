@@ -15,6 +15,8 @@ public:
     virtual std::string Name() const = 0;
     virtual void StopWork() = 0;
     virtual HexLocation ChooseMove(const HexMatrix& board,  HexAttacker attacker) = 0;
+    virtual void Exit() { }
+    virtual void Init() { }
 };
 
 

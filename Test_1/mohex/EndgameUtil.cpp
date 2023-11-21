@@ -288,7 +288,7 @@ bitset_t EndgameUtil::MovesToConsider(const HexBoard& brd, HexColor color)
     bitset_t consider = ComputeConsiderSet(brd, color);
     Q_ASSERT(consider.any());
 
-    qDebug() << "Moves to consider for " << (color ? "white" : "black") << ":" << brd.Write(consider).c_str() << '\n';
+    // qDebug() << "Moves to consider for " << (color ? "white" : "black") << ":" << brd.Write(consider).c_str() << '\n';
     return consider;
 }
 

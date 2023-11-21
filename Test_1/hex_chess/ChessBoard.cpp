@@ -10,11 +10,13 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QThread>
+#include <QLabel>
 #include <QtMath>
+#include <QTimer>
 
+#include "ShareData.h"
 #include "HexLog.h"
-
-//#include "PyInterface.hpp"
+#include "HexTimer.h"
 
 #define _BLACK_ QColor(0, 0, 0, 255)
 #define _WHITE_ QColor(255, 255, 255, 255)
@@ -29,14 +31,13 @@
 #define _RADIO 1
 #define _BORDER_RH 0.25
 #define _FONT_NAME "JetBrains Mono NL"
-#define _PUCT_ON_ false
 
 
 ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     : QWidget(parent)
     , order(Order)
     , isPlayer(First)
-//    , AIThread(new QThread())
+    , AIThread(new QThread())
     , bottom(order)
     , right((order << 1) + 1)
     , pointsRows(bottom + 1)
@@ -54,14 +55,13 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
     , fontName(_FONT_NAME)
     , board(new HexMatrix(order))
     , points(new QVector<QVector<QPointF>>(pointsRows, QVector<QPointF>(pointsCols)))
-    , coordPoints(new QVector<QPointF>(order<<1))
+    , coordPoints1(new QVector<QPointF>(order<<1))
+    , coordPoints2(new QVector<QPointF>(order<<1))
     , winnerRoute(new QVector<HexLocation>)
     , borderPath_ud(new QPainterPath)
     , borderPath_lr(new QPainterPath)
     , gridPath(new QPainterPath)
     , winnerPath(new QPainterPath)
-    , valueArray1(new QVector<double>(121, 0.0))
-    , valueArray2(new QVector<double>(121, 0.0))
 {
     this->setMinimumSize((boardBaseSize * 20).toSize());
     this->setMouseTracking(true);
@@ -73,40 +73,51 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         break;
     case _GMode::_PvE:
         gameMode = new GamePvE(&isEnd, board, winnerRoute, &attacker, isPlayer);
+        connect(this, &ChessBoard::AIWorking, this, &ChessBoard::StartTime);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             ai_is_working = false;
             hexLog() << hst::plyer;
+            (*attacker ? whiteTimer : blackTimer)->Stop();
             PlaceChessPieces(_row, _col);
         });
-        AIThread = new QThread();
         AIThread->start();
         break;
     case _GMode::_EvE:
         gameMode = new GameEvE(&isEnd, board, winnerRoute, &attacker);
+        connect(this, &ChessBoard::AIWorking, this, &ChessBoard::StartTime);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
             ai_is_working = false;
             hexLog() << hst::plyer;
+            (*attacker ? whiteTimer : blackTimer)->Stop();
             PlaceChessPieces(_row, _col);
         });
-        AIThread = new QThread();
         AIThread->start();
         isPlayer = false;
         break;
     case _GMode::_Debug:
         debug = true;
         gameMode = new GameDebug(&isEnd, board, winnerRoute, &attacker);
+        connect(this, &ChessBoard::AIWorking, this, &ChessBoard::StartTime);
         connect(this, &ChessBoard::AIWorking, gameMode, &GameMode::AIWork);
         connect(gameMode, &GameMode::placeChess, this, [=](int _row, int _col) {
+            if (_row == 250) {
+                initFinished = true;
+                hexLog() << "init finished!" << hlg::endl << hlg::ln;
+                return;
+            }
             ai_is_working = false;
+            afterWorking = true;
+            (*attacker ? whiteTimer : blackTimer)->Stop();
             hexLog() << hst::plyer;
             if (_row == 254) return;
             PlaceChessPieces(_row, _col);
         });
         connect(this, &ChessBoard::setPieces, (GameDebug*)gameMode, &GameDebug::AddHistory);
         connect(this, &ChessBoard::RegretAMove, (GameDebug*)gameMode, &GameDebug::RegretAMove);
-        AIThread = new QThread();
+        connect(this, &ChessBoard::isExit, (GameDebug*)gameMode, &GameDebug::Exit);
+        connect(this, &ChessBoard::needInit, (GameDebug*)gameMode, &GameDebug::Init);
         AIThread->start();
         isPlayer = true;
         break;
@@ -137,6 +148,33 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
         });
     }
 
+    his().resize(0);
+    hisMove().resize(0);
+    hexLog() << "now is initing AI!" << hlg::endl << hlg::ln;
+
+    blackTimer = new HexTimer();
+    whiteTimer = new HexTimer();
+    timerLabel1 = new QLabel(this);
+    timerLabel2 = new QLabel(this);
+    timerLabel1->setStyleSheet("color: rgb(234, 67, 53)");
+    timerLabel2->setStyleSheet("color: rgb(66, 133, 244)");
+
+    myTimer = new QTimer(this);
+    myTimer->setInterval(125);
+    connect(myTimer, &QTimer::timeout, this, [this]() {
+        if (ai_is_working) {
+            if (*attacker)
+                timerLabel2->setText(whiteTimer->Str());
+            else timerLabel1->setText(blackTimer->Str());
+        }
+        if (afterWorking) {
+            afterWorking = false;
+            if (!*attacker)
+                timerLabel2->setText(whiteTimer->Str());
+            else timerLabel1->setText(blackTimer->Str());
+        }
+    });
+    myTimer->start();
 
 //    if (debug && order == 11 && _PUCT_ON_)
 //    {
@@ -157,16 +195,14 @@ ChessBoard::ChessBoard(int Order, bool First, int GMD, QWidget *parent)
 
 ChessBoard::~ChessBoard()
 {
-
-//    if (debug && order == 11 && _PUCT_ON_)
-//    {
-//        model_closes();
-//    }
-
-
-    delete gameMode;
+//    if (!ai_is_working)
+    {
+        emit isExit();
+        while(!rdy());
+    }
     AIThread->exit();
     AIThread->wait();
+    delete gameMode;
     delete AIThread;
 
     delete empty;
@@ -176,7 +212,8 @@ ChessBoard::~ChessBoard()
     delete white_t;
 
     delete points;
-    delete coordPoints;
+    delete coordPoints1;
+    delete coordPoints2;
     delete winnerRoute;
     delete borderPath_ud;
     delete borderPath_lr;
@@ -184,6 +221,8 @@ ChessBoard::~ChessBoard()
     delete winnerPath;
     
     delete board;
+    delete blackTimer;
+    delete whiteTimer;
 }
 
 void ChessBoard::resizeEvent(QResizeEvent *event)
@@ -208,6 +247,24 @@ void ChessBoard::resizeEvent(QResizeEvent *event)
     UpdateGridPath();
     UpdateWinnerPath();
     UpdateCoordPoints();
+
+    // Update Timer Label
+    timerLabel1->setFont(coord_f2);
+    timerLabel2->setFont(coord_f2);
+    timerLabel1->move(
+        ((*points)[pointsRows-1][pointsCols-1] - QPointF(
+            gridWidth * order * 0.35,
+            gridHeight * (order + 0.5) * 0.75
+        )).toPoint()
+    );
+    timerLabel2->move(
+        ((*points)[pointsRows-1][pointsCols-1] - QPointF(
+            gridWidth * order * 0.35,
+            gridHeight * (order - 0.5) * 0.75
+        )).toPoint()
+    );
+    timerLabel1->resize(gridWidth * order * 0.35, gridHeight * 0.75);
+    timerLabel2->resize(gridWidth * order * 0.35, gridHeight * 0.75);
 }
 
 void ChessBoard::paintEvent(QPaintEvent *event)
@@ -219,10 +276,6 @@ void ChessBoard::paintEvent(QPaintEvent *event)
         PaintProjection();
     }
     PaintOtherComponents();
-    if (showValue)
-    {
-        PaintValueInfo();
-    }
 }
 
 void ChessBoard::mouseMoveEvent(QMouseEvent *event)
@@ -274,8 +327,8 @@ void ChessBoard::mouseMoveEvent(QMouseEvent *event)
         || mouse_row == order
         || mouse_col == order
     ) ? (mouse_col = -1) : mouse_row;
-    coord_row = mouse_row == -1 ? ' ' : mouse_row + 65;
-    coord_col = mouse_col == -1 ? ' ' : mouse_col;
+    coord_row = mouse_row == -1 ? ' ' : 11 - mouse_row;
+    coord_col = mouse_col == -1 ? ' ' : mouse_col + 65;
     if (_mr != mouse_row || _mc != mouse_col)
     {
         update();
@@ -305,9 +358,9 @@ void ChessBoard::mouseReleaseEvent(QMouseEvent *event)
             if (board->GetCell(press_row, press_col) == HexCell::Empty)
             {
                 hexLog() << "Player set" << (*attacker ? "white" : "black")
-                       << "(" << (int)press_row << "," << (int)press_col << ")"
-                       << (*attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl)
-                       << hlg::ln;
+                         << HexLocation(press_row, press_col).Str()
+                         << (*attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl)
+                         << hlg::ln;
                 PlaceChessPieces(press_row, press_col);
             }
         }
@@ -413,18 +466,25 @@ void ChessBoard::UpdateCoordPoints()
     coord_f2.setPointSizeF(gridWidth * order / 25);
     coord_label_p1 = (*points)[0][0] + QPointF(0, gridHeight * (order + 0.5) * 0.75);
     coord_label_p2 = coord_label_p1 + QPointF(gridWidth * order / 4, 0);
-    int end = order < 10 ? order : 10;
-    for (int i = 0; i < end; i++)
+    int begin = order < 10 ? 0 : order - 9;
+    int _col = order << 1;
+    for (int i = begin; i < order; i++)
     {
         int _i = i << 1;
-        (*coordPoints)[_i++] = (*points)[i+1][0] - QPointF(gridWidth / 3, gridHeight / 6);
-        (*coordPoints)[_i] = (*points)[0][_i] - QPointF(0, gridHeight / 6);
+        (*coordPoints1)[_i] = (*points)[i+1][0] - QPointF(gridWidth / 3, gridHeight / 6);
+        (*coordPoints2)[_i] = (*points)[i+1][_col] - QPointF(-gridWidth / 8, gridHeight / 12);
+        _i++;
+        (*coordPoints1)[_i] = (*points)[0][_i] - QPointF(0, gridHeight / 6);
+        (*coordPoints2)[_i] = (*points)[order][_i] + QPointF(gridWidth / 3, gridHeight / 6);
     }
-    for (int i = end; i < order; i++)
+    for (int i = 0; i < begin; i++)
     {
         int _i = i << 1;
-        (*coordPoints)[_i++] = (*points)[i+1][0] - QPointF(gridWidth / 3, gridHeight / 6);
-        (*coordPoints)[_i] = (*points)[0][_i] - QPointF(gridWidth / 9, gridHeight / 6);
+        (*coordPoints1)[_i] = (*points)[i+1][0] - QPointF(gridWidth * 0.465, gridHeight / 6);
+        (*coordPoints2)[_i] = (*points)[i+1][_col] - QPointF(-gridWidth / 40, gridHeight / 12);
+        _i++;
+        (*coordPoints1)[_i] = (*points)[0][_i] - QPointF(0, gridHeight / 6);
+        (*coordPoints2)[_i] = (*points)[order][_i] + QPointF(gridWidth / 3, gridHeight / 6);
     }
 }
 
@@ -461,44 +521,6 @@ void ChessBoard::PaintPiecesPlaced()
     painter.setPen(QPen(Qt::transparent, 0));
     QPointF add(gridWidth, 0);
 
-    if (showValue)
-    {
-        double max1 = 0, max2 = 0;
-        int _r1 = -1, _r2 = -1, _c1 = -1, _c2 = -1;
-        for (int i = 0; i < 121; i++)
-        {
-            if ((*valueArray1)[i] > max1 && (*board)(i) == HexCell::Empty)
-            {
-                _r1 = i / 11;
-                _c1 = i % 11;
-                max1 = (*valueArray1)[i];
-            }
-            if ((*valueArray2)[i] > max2 && (*board)(i) == HexCell::Empty)
-            {
-                _r2 = i / 11;
-                _c2 = i % 11;
-                max2 = (*valueArray2)[i];
-            }
-        }
-
-        if (_r1 != -1)
-        {
-            painter.setBrush(_YELLOW_);
-            painter.drawEllipse(
-                (((*points)[_r1][1] + (*points)[_r1+1][2]) / 2) + add * _c1,
-                radius_dotted, radius_dotted
-            );
-        }
-        if (_r2 != -1)
-        {
-            painter.setBrush(_YELLOW_);
-            painter.drawEllipse(
-                (((*points)[_r2][1] + (*points)[_r2+1][2]) / 2) + add * _c2,
-                radius_dotted, radius_dotted
-            );
-        }
-    }
-
     QBrush *_c[2]{black, white};
     for (int i = 0; i < order; i++)
     {
@@ -510,6 +532,28 @@ void ChessBoard::PaintPiecesPlaced()
                 painter.setBrush(*_c[static_cast<int>(board->GetCell(i, j))]);
                 painter.drawEllipse(centre + add * j, radius_solid, radius_solid);
             }
+        }
+    }
+
+    // painter count
+    painter.setPen(_BLACK_);
+    painter.setFont(coord_f1);
+    for (int i = 0, end = hisMove().size(); i < end; i++)
+    {
+        int _r = hisMove()[i] / 11 + 1;
+        int _c = (hisMove()[i] % 11) << 1;
+        if (i < 9) {
+            painter.drawText(
+                (*points)[_r][_c] + QPointF(gridWidth * 0.38, -gridHeight / 8),
+                QString::number(i+1));
+        } else if (i < 99) {
+            painter.drawText(
+                (*points)[_r][_c] + QPointF(gridWidth * 0.263, -gridHeight / 8),
+                QString::number(i+1));
+        } else {
+            painter.drawText(
+                (*points)[_r][_c] + QPointF(gridWidth * 0.146, -gridHeight / 8),
+                QString::number(i+1));
         }
     }
     painter.end(); // end
@@ -539,96 +583,22 @@ void ChessBoard::PaintOtherComponents()
     for (int i = 0; i < order; i++)
     {
         int _i = i << 1;
-        painter.drawText((*coordPoints)[_i], (*coord_char)[i]);
-        painter.drawText((*coordPoints)[++_i], QString::number(i));
+        painter.drawText((*coordPoints1)[_i], QString::number(order-i));
+        painter.drawText((*coordPoints2)[_i], QString::number(order-i));
+        painter.drawText((*coordPoints1)[++_i], (*coord_char)[i]);
+        painter.drawText((*coordPoints2)[_i], (*coord_char)[i]);
     }
     painter.setFont(coord_f2);
     painter.setPen(white->color());
-    painter.drawText(coord_label_p1, QString("row: ") + coord_row);
-    painter.setPen(black->color());
-    painter.drawText(coord_label_p2,
-        QString("col: ") +(coord_col == ' ' ? "" : QString::number(coord_col))
-    );
-    painter.end(); // end
-}
-
-
-void ChessBoard::UpdateValue()
-{
-
-//    QVector<double> values = BoardToNP(
-//        *board,
-//        static_cast<GameDebug*>(gameMode)->GetRegret(1),
-//        static_cast<GameDebug*>(gameMode)->GetRegret(2),
-//        attacker
-//    );
-//    value1 = values[0];
-//    value2 = values[1];
-//    for (int i = 0; i < 121; i++)
-//    {
-//        (*valueArray1)[i] = values[i+2];
-//        (*valueArray2)[i] = values[i+124];
-//    }
-//    swap = values[245];
-//    other1 = values[123];
-//    other2 = values[246];
-}
-
-void ChessBoard::PaintValueInfo()
-{
-    QPainter painter(this);
-    painter.setFont(coord_f1);
-    painter.setPen(_BLACK_);
-    for (int row = 0; row < order; row++)
-    {
-        for (int col = 0; col < order; col++)
-        {
-            painter.setPen(black->color());
-            painter.drawText(
-                (*points)[row + 1][col << 1] + QPointF(gridWidth/8, gridHeight/20),
-                QString("%1").arg(
-                    static_cast<int>((*valueArray1)[row*order+col] * 1000),
-                    3, 10, QChar('0')
-                )
-            );
-            painter.setPen(white->color());
-            painter.drawText(
-                (*points)[row + 1][col << 1] + QPointF(gridWidth/8, -gridHeight/3),
-                QString("%1").arg(
-                    static_cast<int>((*valueArray2)[row*order+col] * 1000),
-                    3, 10, QChar('0')
-                )
-            );
-        }
-    }
-    painter.setPen(white->color());
     painter.drawText(
-        coord_label_p1 + QPointF(0, -gridHeight * 3),
-//        QString("0.%1").arg(static_cast<int>(swap * 100), 4, 10, QChar('0'))
-        QString("swap: %1").arg(swap, 0, 'f', 5)
-    );
-    painter.drawText(
-        coord_label_p1 + QPointF(0, -gridHeight),
-//        QString("0.%1").arg(static_cast<int>(value2 * 100), 4, 10, QChar('0'))
-        QString("value2: %1").arg(value2, 0, 'f', 5)
-    );
-    painter.drawText(
-        coord_label_p1 + QPointF(0, -gridHeight * 2),
-//        QString("0.%1").arg(static_cast<int>(other2 * 100), 4, 10, QChar('0'))
-        QString("other2: %1").arg(other2, 0, 'f', 5)
+        coord_label_p2,
+        QString("row: ") + (coord_row == ' ' ? "" : QString::number(coord_row))
     );
     painter.setPen(black->color());
     painter.drawText(
-        coord_label_p1 + QPointF(0, -gridHeight * 1.5),
-//        QString("0.%1").arg(static_cast<int>(value1 * 100), 4, 10, QChar('0'))
-        QString("value1: %1").arg(value1, 0, 'f', 5)
+        coord_label_p1,
+        QString("col: ") + coord_col
     );
-    painter.drawText(
-        coord_label_p1 + QPointF(0, -gridHeight * 2.5),
-//        QString("0.%1").arg(static_cast<int>(other1 * 100), 4, 10, QChar('0'))
-        QString("other1: %1").arg(other1, 0, 'f', 5)
-    );
-
     painter.end(); // end
 }
 
@@ -646,7 +616,16 @@ void ChessBoard::PlaceChessPieces(int row, int col)
     emit setPieces(row, col);
     ConditionsDetermine();
     update();
-    if (!isPlayer && !isEnd && !debug || (demo && !isEnd))
+    if (!initFinished && quick && quickAttacker)
+    {
+        hexLog() << "ai init not finished, agent try move failed"
+                 << (*attacker ? hlg::wdl : hlg::bdl);
+    }
+    if (!isEnd &&
+        ((!isPlayer && !debug) ||
+        (demo) ||
+        (initFinished && quick && quickAttacker))
+       )
     {
         ai_is_working = true;
         emit AIWorking();
@@ -662,16 +641,45 @@ void ChessBoard::ConditionsDetermine()
                << (*attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
         demo_stop();
         UpdateWinnerPath();
+        wner() = *attacker;
+        emit GameOver(*attacker);
         return;
     }
+    if (quick) quickAttacker = !quickAttacker;
     attacker = !attacker;
     isPlayer = gameMode->IsPlayer();
 
 }
 
+void ChessBoard::StartTime()
+{
+    if (initFinished)
+        (*attacker ? whiteTimer : blackTimer)->Start();
+}
+
+
+void ChessBoard::ai_quick(bool c)
+{
+    quick = c;
+    if (!quick)
+    {
+        quickAttacker = false;
+    }
+    else
+    {
+        hexLog() << "agent represented"
+                 << (*attacker ? "Black" : "White")
+                 << (*attacker ? hlg::bdl : hlg::wdl);
+    }
+}
 
 void ChessBoard::ai_move()
 {
+    if (!initFinished)
+    {
+        hexLog() << "init not finished!" << hlg::endl << hlg::ln;
+        return;
+    }
     if (!ai_is_working && !isEnd)
     {
         ai_is_working = true;
@@ -687,8 +695,9 @@ void ChessBoard::ai_stop()
 
 void ChessBoard::ai_demo()
 {
-    if (!ai_is_working && !isEnd)
+    if (!ai_is_working && !isEnd && initFinished)
     {
+        ai_is_working = true;
         emit AIWorking();
     }
     demo = true;
@@ -704,13 +713,21 @@ void ChessBoard::demo_stop()
 
 void ChessBoard::regret_a_move()
 {
-    if (!board->PiecesNum()) { hexLog() << "board is empty" << hlg::endl; return; }
+    if (!board->PiecesNum())
+    { hexLog() << "board is empty" << hlg::endl << hlg::ln; return; }
     if (!ai_is_working && !isEnd)
     {
         ai_is_working = true;
+        attacker = !attacker;
+        if (quick) quickAttacker = !quickAttacker;
         emit RegretAMove();
     }
     else if(ai_is_working) hexLog() << hst::aiwarn;
+}
+
+void ChessBoard::need_init()
+{
+    emit needInit();
 }
 
 
