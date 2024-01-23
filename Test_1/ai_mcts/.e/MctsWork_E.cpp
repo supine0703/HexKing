@@ -19,7 +19,7 @@
  * reappear after I replaced QVector with a self-defined array.
  */
 
-MctsWork_E::MctsWork_E(const QSharedPointer<MctsNode>& child, const HexBoard &board)
+MctsWork_E::MctsWork_E(const QSharedPointer<MctsNode>& child, const HexMatrix &board)
     : board(board)
     , node(child)
 {
@@ -43,13 +43,13 @@ void MctsWork_E::SimulatedPlayout()
     const auto [_r, _c] = node->Move();
     board(_r, _c, currentAttacker);
     // Continue simulation until a winner is detected
-    bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker);
+    bool WinnerDecided(const HexMatrix& board,const HexAttacker& attacker);
     while (!WinnerDecided(board, currentAttacker))
     {
         // Switch player
         currentAttacker = !currentAttacker;
         // Get valid moves
-        QVector<HexPoint> validMoves = GetValidMoves_E(board);
+        QVector<HexLocation> validMoves = GetValidMoves_E(board);
         // Generate a distribution and choose a move randomly
         static QRandomGenerator random;
         const auto [__r, __c] = validMoves[random.bounded(validMoves.count())];
@@ -72,9 +72,9 @@ void MctsWork_E::SimulatedPlayout()
     }
 }
 
-QVector<HexPoint> GetValidMoves_E(const HexBoard &board)
+QVector<HexLocation> GetValidMoves_E(const HexMatrix &board)
 {
-    QVector<HexPoint> validMoves;
+    QVector<HexLocation> validMoves;
     for (int i = 0, end = board.Order(); i < end; i++)
     {
         for (int j = 0; j < end; j++)
@@ -89,14 +89,14 @@ QVector<HexPoint> GetValidMoves_E(const HexBoard &board)
 }
 
 #include <QStack>
-inline bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker)
+inline bool WinnerDecided(const HexMatrix& board,const HexAttacker& attacker)
 {
     int num[2] { 0, 0 };
     int &r = num[0];
     int &c = num[1];
-
-    QStack<HexPoint> stack;
-    QVector<HexPoint> visited;
+    
+    QStack<HexLocation> stack;
+    QVector<HexLocation> visited;
     int order = board.Order();
     for (int &p = num[*(!attacker)]; p < order; p++)
     {
@@ -109,7 +109,7 @@ inline bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker)
     // dfs
     while (!stack.isEmpty())
     {
-        HexPoint coord = stack.pop();
+        HexLocation coord = stack.pop();
         r = coord.row;
         c = coord.col;
 

@@ -7,12 +7,11 @@
 
 class GameDebug : public GameMode, private ChooseAI
 {
-
 public:
     GameDebug(
         bool *end,
-        HexBoard *_board,
-        QVector<HexPoint> *_winner,
+        HexMatrix *_board,
+        QVector<HexLocation> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr
     );
@@ -23,6 +22,7 @@ public:
     void RegretAMove();
     void AddHistory(int row, int col);
     void StopAI();
+    HexLocation GetRegret(int step);
 
     QString dm = "";
 
@@ -30,9 +30,12 @@ private:
     HexAttacker *nowAttacker;
     HexAI* blackAI;
     HexAI* whiteAI;
+    
+    QStack<HexLocation>* history;
 
-    QStack<HexPoint>* history;
-
+public:
+    void Exit() override;
+    void Init();
 };
 
 #endif // GAMEDEBUG_H

@@ -4,8 +4,8 @@
 
 GameEvE::GameEvE(
     bool *end,
-    HexBoard *_board,
-    QVector<HexPoint> *_winner,
+    HexMatrix *_board,
+    QVector<HexLocation> *_winner,
     HexAttacker *_attacker,
     QObject *parent)
     : GameMode(end, _board, _winner, _attacker, parent)
@@ -24,17 +24,17 @@ void GameEvE::AIWork()
 {
     if (*(*nowAttacker))
     {
-        hexLog << whiteAI->Name() << hst::whtai;
+        hexLog() << whiteAI->Name() << hst::whtai;
         auto [row, col] = whiteAI->ChooseMove(*board, *nowAttacker);
-        hexLog << whiteAI->Name() << "placed" << "white"
+        hexLog() << whiteAI->Name() << "placed" << "white"
                << "(" << row << "," << col << ")" << hlg::wdl << hlg::ln;
         emit placeChess(row, col);
     }
     else
     {
-        hexLog << blackAI->Name() << hst::blkai;
+        hexLog() << blackAI->Name() << hst::blkai;
         auto [row, col] = blackAI->ChooseMove(*board, *nowAttacker);
-        hexLog << blackAI->Name() << "placed" << "black"
+        hexLog() << blackAI->Name() << "placed" << "black"
                << "(" << row << "," << col << ")" << hlg::bdl << hlg::ln;
         emit placeChess(row, col);
     }

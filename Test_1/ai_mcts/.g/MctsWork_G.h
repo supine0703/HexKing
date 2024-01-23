@@ -3,10 +3,10 @@
 
 #include <QRunnable>
 #include <QSharedPointer>
-#include "HexBoard.hpp"
+#include "HexMatrix.hpp"
 #include "MctsNode.hpp"
 
-QVector<HexPoint> GetValidMoves_G(const HexBoard& board);
+QVector<HexLocation> GetValidMoves_G(const HexMatrix& board);
 
 class QElapsedTimer;
 
@@ -15,7 +15,7 @@ class MctsWork_G : public QRunnable
 public:
     MctsWork_G(
         const QSharedPointer<MctsNode>& root,
-        const HexBoard& board,
+        const HexMatrix& board,
         const QElapsedTimer& usedTime,
         const uint& endTime,
         const double& ecf
@@ -24,13 +24,13 @@ public:
 
 private:
     double UCTScore(double cWins, double cVisits, double pVisits);
-    void SelectChildPlayout(HexBoard& virBoard, QSharedPointer<MctsNode>& node);
-    void ExpandNode(QSharedPointer<MctsNode> &node, HexBoard &virBoard);
-    void SimulatedPlayout(const QSharedPointer<MctsNode>& node, HexBoard& virBoard);
+    void SelectChildPlayout(HexMatrix& virBoard, QSharedPointer<MctsNode>& node);
+    void ExpandNode(QSharedPointer<MctsNode> &node, HexMatrix &virBoard);
+    void SimulatedPlayout(const QSharedPointer<MctsNode>& node, HexMatrix& virBoard);
     void Backpropagate(QSharedPointer<MctsNode>& node);
 
     QSharedPointer<MctsNode> root;
-    const HexBoard& board;
+    const HexMatrix& board;
     const QElapsedTimer& usedTime;
     const uint& endTime;
     const double ecf;

@@ -3,7 +3,8 @@
 
 #include <QVector>
 #include <QSharedPointer>
-#include "HexPoint.hpp"
+#include "HexArrayT.hpp"
+#include "HexLocation.hpp"
 #include "HexCell.hpp"
 
 class MctsNode
@@ -11,15 +12,17 @@ class MctsNode
     MctsNode(const MctsNode&) = delete;
     MctsNode& operator=(MctsNode&) = delete;
 public:
+
     MctsNode(
         const HexAttacker& attacker,
-        const HexPoint& move,
+        const HexLocation& move,
         const uint16_t& childrenTotal,
-        const QSharedPointer<MctsNode>& parent = nullptr
+        const QSharedPointer<MctsNode>& parent = nullptr,
+        const HexArrayT<bool>* sets = nullptr
     );
 
     HexAttacker Attacker() const;
-    HexPoint Move() const;
+    HexLocation Move() const;
     QSharedPointer<MctsNode> Parent() const;
     int WinsNum() const;
     int VisitsNum() const;
@@ -30,23 +33,29 @@ public:
 
     void Expand(MctsNode* child);
     QSharedPointer<MctsNode> Child(const int& index);
+    bool Get(int r, int c);
+    HexArrayT<bool>& Get();
+    void Set(QVector<HexLocation>& moves);
+    void Set(int index);
 
 private:
     const HexAttacker attacker;
-    const HexPoint move;
-    const uint16_t childrenTotal;
+    const HexLocation move;
+    uint16_t childrenTotal;
     const QSharedPointer<MctsNode> parent;
     QAtomicInteger<uint32_t> winsNum; // number of wins
     QAtomicInteger<uint32_t> visitsNum; // number of visits
     QAtomicInteger<uint16_t> expandedNum; // number of expanded child
     QVector<QSharedPointer<MctsNode>> children;
+    HexArrayT<bool> sets;
 };
 
 inline MctsNode::MctsNode(
     const HexAttacker& attacker,
-    const HexPoint& move,
+    const HexLocation& move,
     const uint16_t& childrenTotal,
-    const QSharedPointer<MctsNode>& parent)
+    const QSharedPointer<MctsNode>& parent,
+    const HexArrayT<bool>* sets)
     : attacker(attacker)
     , move(move)
     , childrenTotal(childrenTotal)
@@ -55,6 +64,7 @@ inline MctsNode::MctsNode(
     , visitsNum(0)
     , expandedNum(0)
     , children(childrenTotal)
+    , sets(sets ? *sets : 121)
 {
 }
 
@@ -63,7 +73,7 @@ inline HexAttacker MctsNode::Attacker() const
     return attacker;
 }
 
-inline HexPoint MctsNode::Move() const
+inline HexLocation MctsNode::Move() const
 {
     return move;
 }
@@ -111,8 +121,32 @@ inline void MctsNode::Expand(MctsNode *child)
 
 inline QSharedPointer<MctsNode> MctsNode::Child(const int &index)
 {
+    Q_ASSERT(index < childrenTotal);
     Q_ASSERT(index < expandedNum);
     return children[index];
+}
+
+inline bool MctsNode::Get(int r, int c)
+{
+    return sets[c + r * 11];
+}
+
+inline HexArrayT<bool> &MctsNode::Get()
+{
+    return sets;
+}
+
+inline void MctsNode::Set(QVector<HexLocation> &moves)
+{
+    for (const auto& m : moves)
+    {
+        sets[m.col + m.row * 11] = true;
+    }
+}
+
+inline void MctsNode::Set(int index)
+{
+    sets[index] = true;
 }
 
 #endif // MCTSNODE_H

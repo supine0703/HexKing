@@ -1,16 +1,17 @@
 #include "GameDebug.h"
 
-#include <HexLog.h>
+#include "HexLog.h"
 #include <QStack>
+#include "ShareData.h"
 
 GameDebug::GameDebug(
     bool *end,
-    HexBoard *_board,
-    QVector<HexPoint> *_winner,
+    HexMatrix *_board,
+    QVector<HexLocation> *_winner,
     HexAttacker *_attacker, QObject *parent)
     : GameMode(end, _board, _winner, _attacker, parent)
     , nowAttacker(_attacker)
-    , history(new QStack<HexPoint>)
+    , history(new QStack<HexLocation>)
 {
     choose_ai(3, blackAI, whiteAI);
 }
@@ -26,19 +27,19 @@ void GameDebug::AIWork()
 {
     if (*(*nowAttacker))
     {
-        hexLog << dm << whiteAI->Name() << hst::whtai;
-        auto [row, col] = whiteAI->ChooseMove(*board, *nowAttacker);
-        hexLog << whiteAI->Name() << "placed" << "white"
-               << "(" << row << "," << col << ")" << hlg::wdl << hlg::ln;
-        emit placeChess(row, col);
+        hexLog() << dm << whiteAI->Name() << hst::whtai;
+        auto move = whiteAI->ChooseMove(*board, *nowAttacker);
+        hexLog() << whiteAI->Name() << "placed" << "white"
+                 << move.Str() << " the" << hisMove().size()+1 << hlg::wdl << hlg::ln;
+        emit placeChess(move.row, move.col);
     }
     else
     {
-        hexLog << dm << blackAI->Name() << hst::blkai;
-        auto [row, col] = blackAI->ChooseMove(*board, *nowAttacker);
-        hexLog << blackAI->Name() << "placed" << "black"
-               << "(" << row << "," << col << ")" << hlg::bdl << hlg::ln;
-        emit placeChess(row, col);
+        hexLog() << dm << blackAI->Name() << hst::blkai;
+        auto move = blackAI->ChooseMove(*board, *nowAttacker);
+        hexLog() << blackAI->Name() << "placed" << "black"
+                 << move.Str() << " the" << hisMove().size()+1 << hlg::bdl << hlg::ln;
+        emit placeChess(move.row, move.col);
     }
 }
 
@@ -49,13 +50,12 @@ bool GameDebug::IsPlayer()
 
 void GameDebug::RegretAMove()
 {
-    HexPoint move = history->pop();
+    HexLocation move = history->pop();
+    hisMove().pop_back();
 
     Q_ASSERT((*board)(move) != HexCell::Empty);
-    *nowAttacker = !(*nowAttacker);
-    hexLog << "Regret a move" << (*(*nowAttacker) ? "White" : "Black")
-           <<"(" << move.row << "," << move.col << ")"
-           << (*nowAttacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
+    hexLog() << "Regret a move" << (*(*nowAttacker) ? "White" : "Black") << move.Str()
+             << (*nowAttacker == HexAttacker::Black ? hlg::bdl : hlg::wdl) << hlg::ln;
     (*board)(move, HexCell::Empty);
 
     board->subPiece();
@@ -66,10 +66,37 @@ void GameDebug::RegretAMove()
 void GameDebug::AddHistory(int row, int col)
 {
     history->push({row, col});
+    hisMove().push_back(row * 11 + col);
 }
 
 void GameDebug::StopAI()
 {
     whiteAI->StopWork();
     blackAI->StopWork();
+}
+
+HexLocation GameDebug::GetRegret(int step)
+{
+    if (history->size() < step)
+    {
+        return {-1, -1};
+    }
+    else
+    {
+        return (*history)[step-1];
+    }
+}
+
+void GameDebug::Exit()
+{
+    blackAI->Exit();
+    whiteAI->Exit();
+    rdy() = true;
+}
+
+void GameDebug::Init()
+{
+    blackAI->Init();
+    whiteAI->Init();
+    emit placeChess(250, 0);
 }

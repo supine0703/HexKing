@@ -16,14 +16,14 @@ public:
     AI_Mcts_E(double ecf, int max_decision_time, bool parallelized = false);
     ~AI_Mcts_E() override;
     std::string Name() const override { return "AI_Mcts_E"; }
-    HexPoint ChooseMove(const HexBoard& board,  HexAttacker attacker) override;
+    HexLocation ChooseMove(const HexMatrix& board,  HexAttacker attacker) override;
     void StopWork() override;
 
 private:
-
-    void ExpandNode(const HexBoard& board);
     
-    void MctsSearch(int& itCounter, const HexBoard& board);
+    void ExpandNode(const HexMatrix& board);
+    
+    void MctsSearch(int& itCounter, const HexMatrix& board);
 
     QSharedPointer<MctsNode> SelectChildPlayout();
 

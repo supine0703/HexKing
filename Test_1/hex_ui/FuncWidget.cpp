@@ -13,6 +13,10 @@ FuncWidget::~FuncWidget()
     delete ui;
 }
 
+void FuncWidget::ReQuickFunc()
+{
+    emit AIQuick(ui->ai_quick->isChecked());
+}
 
 
 void FuncWidget::on_ai_move_clicked()
@@ -42,5 +46,11 @@ void FuncWidget::on_demo_stop_clicked()
 void FuncWidget::on_regret_a_move_clicked()
 {
     emit RegretAMove();
+}
+
+
+void FuncWidget::on_ai_quick_clicked(bool checked)
+{
+    emit AIQuick(checked);
 }
 

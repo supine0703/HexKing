@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QVector>
-#include "HexBoard.hpp"
-#include "HexPoint.hpp"
+#include "HexMatrix.hpp"
+#include "HexLocation.hpp"
 
 class GameMode : public QObject
 {
@@ -12,15 +12,15 @@ class GameMode : public QObject
 protected:
     GameMode(
         bool *end,
-        HexBoard *_board,
-        QVector<HexPoint> *_winner,
+        HexMatrix *_board,
+        QVector<HexLocation> *_winner,
         HexAttacker *_attacker,
         QObject *parent = nullptr
     );
 
     bool *end;
-    HexBoard *board;
-    QVector<HexPoint> *winnerRoute;
+    HexMatrix *board;
+    QVector<HexLocation> *winnerRoute;
     HexAttacker *nowAttacker;
 
 public:
@@ -28,6 +28,7 @@ public:
     virtual void AIWork();
     virtual void Determine();
     virtual bool IsPlayer() = 0;
+    virtual void Exit() { }
 
 private:
     bool Outcome();

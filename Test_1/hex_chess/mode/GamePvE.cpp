@@ -4,8 +4,8 @@
 
 GamePvE::GamePvE(
     bool *end,
-    HexBoard *_board,
-    QVector<HexPoint> *_winner,
+    HexMatrix *_board,
+    QVector<HexLocation> *_winner,
     HexAttacker *_attacker,
     bool isWhite,
     QObject *parent)
@@ -22,9 +22,9 @@ GamePvE::~GamePvE()
 
 void GamePvE::AIWork()
 {
-    hexLog << AI->Name() << (*(*nowAttacker) ? hst::whtai : hst::blkai);
+    hexLog() << AI->Name() << (*(*nowAttacker) ? hst::whtai : hst::blkai);
     auto [row, col] = AI->ChooseMove(*board, *nowAttacker);
-    hexLog << AI->Name() << "placed" << (*(*nowAttacker) ? "white" : "black")
+    hexLog() << AI->Name() << "placed" << (*(*nowAttacker) ? "white" : "black")
            << "(" << row << "," << col << ")"
            << (*(*nowAttacker) ? hlg::wdl : hlg::bdl) << hlg::ln;
     emit placeChess(row, col);

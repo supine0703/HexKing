@@ -5,7 +5,12 @@
 #include "FuncWidget.h"
 #include "StartWidget.h"
 #include "HexDock.h"
+#include "GameRecord.h"
+#include "ShareData.h"
+#include "RecordDialog.h"
 
+#include <QFile>
+#include <QScreen>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -15,18 +20,26 @@
 #include <QScrollBar>
 
 #include <HexLog.h>
+#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow {parent}
 {
     this->setWindowIconText("HexKing");
-    this->setGeometry(550, 200, 800, 650);
     this->setStyleSheet("font:JetBrains Mono NL");
-    this->setCentralWidget(new StartWidget(this));
+
+    auto startWidget = new StartWidget(this);
+    QSize screenSize = QApplication::primaryScreen()->size();
+    int x = (screenSize.width() - startWidget->width()) >> 1;
+    int y = (screenSize.height() - startWidget->height()) / 3;
+    this->setCentralWidget(startWidget);
+    this->move(x, y);
 
     auto mainMenu = new QAction("Main Menu", this);
     auto restart = new QAction("Restart", this);
     auto exit = new QAction("Exit", this);
+    auto save = new QAction("Save", this);
+    auto saveOption = new QAction("Save Option", this);
 
     funcView = new QAction("FuncView", this);
     funcView->setCheckable(true);
@@ -54,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
     file->addAction(restart);
     file->addSeparator();
     file->addAction(exit);
+    file->addSeparator();
+    file->addAction(save);
+    file->addAction(saveOption);
 
     view->addAction(funcView);
     view->addAction(logView);
@@ -93,7 +109,8 @@ MainWindow::MainWindow(QWidget *parent)
             QMessageBox::Yes | QMessageBox::No
         );
         if (reply == QMessageBox::Yes) {
-            this->setCentralWidget(new ChessBoard(this->order, this->first, this->gmd, this));
+            if (gmd == 3) fcViewCp = funcView->isChecked();
+            InitChess(order, first, gmd);
             logTxt->clear();
         }
     });
@@ -105,6 +122,19 @@ MainWindow::MainWindow(QWidget *parent)
         if (reply == QMessageBox::Yes) {
             qApp->quit();
         }
+    });
+    connect(save, &QAction::triggered, this, [&]() {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this, "Save", "Are you sure you want to Save ?",
+            QMessageBox::Yes | QMessageBox::No
+            );
+        if (reply == QMessageBox::Yes) {
+            SaveHexGame(wner());
+        }
+    });
+    connect(saveOption, &QAction::triggered, this, [&]() {
+        auto dialog = new RecordDialog(this);
+        dialog->show();
     });
     connect(funcView, &QAction::toggled, this, [&](auto visible) {
         if (visible) {
@@ -126,7 +156,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(logDock, &HexDock::clickClose, this, [&]() {
         logView->setChecked(false);
     });
-    connect(&hexLog, &HexLog::txt, this, [&](auto str, auto fmt) {
+    connect(&hexLog(), &HexLog::txt, this, [&](auto str, auto fmt) {
         QScrollBar *bar = logTxt->verticalScrollBar();
         int bottom = bar->maximum();
         logTxt->textCursor().insertText(str, fmt);
@@ -135,9 +165,9 @@ MainWindow::MainWindow(QWidget *parent)
             bar->setValue(bar->maximum());
         }
     });
-    connect(&hexLog, &HexLog::plyer, logWidget, &LogWidget::SetStatePlayer);
-    connect(&hexLog, &HexLog::ai, logWidget, &LogWidget::SetStateAI);
-    connect(&hexLog, &HexLog::warning, logWidget, &LogWidget::SetStateWarn);
+    connect(&hexLog(), &HexLog::plyer, logWidget, &LogWidget::SetStatePlayer);
+    connect(&hexLog(), &HexLog::ai, logWidget, &LogWidget::SetStateAI);
+    connect(&hexLog(), &HexLog::warning, logWidget, &LogWidget::SetStateWarn);
 }
 
 void MainWindow::InitChess(int order, int first, int gmd)
@@ -178,6 +208,48 @@ void MainWindow::InitChess(int order, int first, int gmd)
         static_cast<FuncWidget*>(funcDock->widget()), &FuncWidget::RegretAMove,
         static_cast<ChessBoard*>(chess), &ChessBoard::regret_a_move
     );
+    connect(
+        static_cast<FuncWidget*>(funcDock->widget()), &FuncWidget::AIQuick,
+        static_cast<ChessBoard*>(chess), &ChessBoard::ai_quick
+    );
+    connect(
+        static_cast<ChessBoard*>(chess), &ChessBoard::GameOver,
+        this, &MainWindow::SaveHexGame
+    );
+    static_cast<FuncWidget*>(funcDock->widget())->ReQuickFunc();
+    static_cast<ChessBoard*>(chess)->need_init();
+}
+
+void MainWindow::SaveHexGame(bool winner)
+{
+    QFile read(RECORDS_HOME "/.setting.txt");
+    if (!read.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "Save Error:";
+        qDebug() << "not found record's .setting file --try ->File ->Save Option";
+        return;
+    }
+    QTextStream in(&read);
+    QString line = in.readLine();
+    auto data = line.split("##");
+    read.close();
+    if (!data[0].toInt())
+    {
+        qDebug() << "autosave is closed";
+        return;
+    }
+    QVector<GCell> gcv;
+    while (hisMove().size() == 0) QThread::msleep(100);
+    for (auto point : hisMove())
+    {
+        int x = point % 11;
+        int y = 11 - point / 11;
+        gcv.append({x,y});
+    }
+    if (GameRecord::Mkdir())
+    {
+        GameRecord::SaveGameRecord(gcv, winner);
+    }
 }
 
 

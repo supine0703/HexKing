@@ -14,6 +14,7 @@ public:
     HexArrayT(const size_t& size);
     HexArrayT(const HexArrayT& other);
     HexArrayT(const std::vector<valueType>& other);
+    HexArrayT(const size_t& size, const valueType& value);
     virtual ~HexArrayT();
     virtual HexArrayT& operator=(const HexArrayT& other);
 
@@ -40,6 +41,7 @@ inline HexArrayT<valueType>::HexArrayT(const size_t &size)
     : size{size}
     , array(new valueType[size])
 {
+    memset(array, 0, size * sizeof(valueType));
 }
 
 template<class valueType>
@@ -61,6 +63,14 @@ inline HexArrayT<valueType>::HexArrayT(const std::vector<valueType>& other)
         *p = cell;
         ++p;
     }
+}
+
+template<class valueType>
+inline HexArrayT<valueType>::HexArrayT(const size_t &size, const valueType &value)
+    : size{size}
+    , array(new valueType[size])
+{
+    memset(array, value, size * sizeof(valueType));
 }
 
 template<class valueType>
@@ -131,7 +141,7 @@ inline std::vector<valueType> HexArrayT<valueType>::ToVector() const
 {
     std::vector<valueType> vector(size);
     valueType* p = array;
-    for (auto& cell : vector)
+    for (auto cell : vector)
     {
         cell = *p;
         ++p;

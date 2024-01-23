@@ -26,13 +26,13 @@ AI_Mcts_G::~AI_Mcts_G()
     }
 }
 
-HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
+HexLocation AI_Mcts_G::ChooseMove(const HexMatrix &board, HexAttacker attacker)
 {
     endTime = copyTime;
     if (board.PiecesNum() < 2)
     {
         int set = board.Order() / 2;
-        return HexPoint(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
+        return HexLocation(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
     }
     switch (board.PiecesNum() >> 1)
     {
@@ -40,12 +40,12 @@ HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
         while (false)
         {
             int set = board.Order() / 2;
-            return HexPoint(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
+            return HexLocation(set + (board(set, set) == HexCell::Empty ? 0 : 1), set);
         }
     default:
         if (RootIteration(board))
         {
-            hexLog << "Iteration success" << "| visitsNum :" << root->VisitsNum()
+            hexLog() << "Iteration success" << "| visitsNum :" << root->VisitsNum()
                    << "(" << root->Move().row << "," << root->Move().col << ")"
                    << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
             break;
@@ -66,12 +66,12 @@ HexPoint AI_Mcts_G::ChooseMove(const HexBoard &board, HexAttacker attacker)
     int visitsTotal = root->VisitsNum();
     root = BestChild();
     root->Parent() = nullptr;
-    hexLog << root->WinsNum() << "/" << root->VisitsNum()
+    hexLog() << root->WinsNum() << "/" << root->VisitsNum()
            << "| total:" << visitsTotal
            << "| time:" << usedTime->elapsed()
            << "| step:" << ((board.PiecesNum() + 1) >> 1)
            << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
-    HexPoint bestMove = root->Move();
+    HexLocation bestMove = root->Move();
 
     delete usedTime;
     usedTime = nullptr;
@@ -83,7 +83,7 @@ void AI_Mcts_G::StopWork()
     endTime = 0;
 }
 
-void AI_Mcts_G::MctsSearch(const HexBoard &board)
+void AI_Mcts_G::MctsSearch(const HexMatrix &board)
 {
     if (parallelized)
     {
@@ -136,7 +136,7 @@ QSharedPointer<MctsNode> AI_Mcts_G::BestChild()
     return bestChild;
 }
 
-bool AI_Mcts_G::RootIteration(const HexBoard& board)
+bool AI_Mcts_G::RootIteration(const HexMatrix& board)
 {
 //    for (int i = 0; i < root->ExpandedNum(); i++)
 //    {

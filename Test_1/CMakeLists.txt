@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Test_1 VERSION 0.1 LANGUAGES CXX)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -12,6 +11,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
+set(Python3_INCLUDE_DIRS "E:/Tools/anaconda3/envs/py311/include")
+set(Python3_LIBRARIES "E:/Tools/anaconda3/envs/py311/libs/python311.lib")
+
+include_directories(${Python3_INCLUDE_DIRS})
+
+set(pkgdatadir ${CMAKE_CURRENT_SOURCE_DIR}/share)
+set(top_srcdir ${CMAKE_CURRENT_SOURCE_DIR})
+add_definitions(
+    -DABS_TOP_SRCDIR="${top_srcdir}"
+    -DDATADIR="${pkgdatadir}"
+    -DNDEBUG
+)
+
+add_subdirectory(mohex)
+include_directories(mohex)
 
 include_directories(
     hex_model
@@ -25,6 +40,8 @@ include_directories(
     ai_mcts/.a
     ai_mcts/.e
     ai_mcts/.g
+    ai_mcts/.i
+    ai_mcts/.puct
 )
 
 set(UI
@@ -36,6 +53,14 @@ set(UI
     hex_ui/FuncWidget.h
     hex_ui/FuncWidget.cpp
     hex_ui/FuncWidget.ui
+
+    hex_ui/LogWidget.h
+    hex_ui/LogWidget.cpp
+    hex_ui/LogWidget.ui
+    hex_ui/HexLog.h
+    hex_ui/HexLog.cpp
+    hex_ui/HexDock.h
+    hex_ui/HexDock.cpp
 )
 
 set(MODEL_SOURCES
@@ -45,10 +70,10 @@ set(MODEL_SOURCES
     hex_model/HexIterator.hpp
     hex_model/HexArrayT.hpp
     hex_model/HexCell.hpp
-    hex_model/HexPoint.hpp
+    hex_model/HexLocation.hpp
     hex_model/HexCellArray.hpp
-    hex_model/HexBoard.hpp
-    hex_model/HexBoard.cpp
+    hex_model/HexMatrix.hpp
+    hex_model/HexMatrix.cpp
 )
 
 set(CHESS_SOURCES
@@ -87,6 +112,11 @@ set(AI_MCTS_SOURCES
     ai_mcts/.g/MctsWork_G.cpp
     ai_mcts/.g/AI_Mcts_G.h
     ai_mcts/.g/AI_Mcts_G.cpp
+
+    ai_mcts/.i/AI_Mcts_I.h
+    ai_mcts/.i/AI_Mcts_I.cpp
+    ai_mcts/.i/MctsWork_I.h
+    ai_mcts/.i/MctsWork_I.cpp
 )
 
 set(PROJECT_SOURCES
@@ -101,10 +131,25 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Test_1
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        hex_ui/LogWidget.h hex_ui/LogWidget.cpp hex_ui/LogWidget.ui
-        hex_ui/HexLog.h hex_ui/HexLog.cpp
-        hex_ui/HexDock.h hex_ui/HexDock.cpp
 
+
+
+        ai_mcts/.i/MoWork.h ai_mcts/.i/MoWork.cpp
+        ai_mcts/.i/MctsNode_I.hpp
+        ai_mcts/.puct/PuctNode.hpp ai_mcts/.puct/PuctNode.cpp
+        ai_mcts/.puct/nn.hpp
+        ai_mcts/.puct/Mcts_puct.hpp ai_mcts/.puct/Mcts_puct.cpp
+
+
+        ai_mcts/.puct/AI_AlphaZero.hpp ai_mcts/.puct/AI_AlphaZero.cpp
+        ai_mcts/.puct/Py_Mcts.hpp
+        ai_mcts/.puct/Py_Mcts.cpp
+        ai_mcts/.puct/ShareData.h
+        ai_mcts/.puct/PyThreadStateLock.hpp
+        hex_ui/HexTimer.h hex_ui/HexTimer.cpp
+        hex_ui/GameRecord.h hex_ui/GameRecord.cpp
+        hex_ui/RecordDialog.h hex_ui/RecordDialog.cpp hex_ui/RecordDialog.ui
+        ai_mcts/.puct/PMoWork.h ai_mcts/.puct/PMoWork.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Test_1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -123,10 +168,20 @@ else()
         )
     endif()
 endif()
-target_compile_definitions(Test_1
-    PRIVATE CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/share/config.txt"
+target_compile_definitions(Test_1 PRIVATE
+    CONFIG_FILE="${CMAKE_CURRENT_SOURCE_DIR}/share/config.txt"
+    PY_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py"
+    AZA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/py/battle"
+    PY_WORK_TXT="${CMAKE_CURRENT_BINARY_DIR}/working.txt"
+    RECORDS_HOME="${CMAKE_CURRENT_SOURCE_DIR}/game_records"
 )
-target_link_libraries(Test_1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Test_1 PRIVATE
+    Qt${QT_VERSION_MAJOR}::Widgets
+    ${Python3_LIBRARIES}
+)
+target_link_libraries(Test_1 PUBLIC
+    mohex
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

@@ -28,7 +28,7 @@ AI_Mcts_E::~AI_Mcts_E()
 //    QObject::~QObject();
 }
 
-HexPoint AI_Mcts_E::ChooseMove(const HexBoard &board, HexAttacker attacker)
+HexLocation AI_Mcts_E::ChooseMove(const HexMatrix &board, HexAttacker attacker)
 {
     // Create a new root node for MCTS
     exit = false;
@@ -43,11 +43,11 @@ HexPoint AI_Mcts_E::ChooseMove(const HexBoard &board, HexAttacker attacker)
     MctsSearch(mcts_itCounter, board);
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
-    hexLog << bestChild->WinsNum() << bestChild->VisitsNum()
+    hexLog() << bestChild->WinsNum() << bestChild->VisitsNum()
              << "| total:" << root->VisitsNum()
              << "| time:" << usedTime->elapsed()
              << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
-    HexPoint bestMove = bestChild->Move();
+    HexLocation bestMove = bestChild->Move();
     root = nullptr;
     delete usedTime;
     usedTime = nullptr;
@@ -59,16 +59,16 @@ void AI_Mcts_E::StopWork()
     exit = true;
 }
 
-void AI_Mcts_E::ExpandNode(const HexBoard &board)
+void AI_Mcts_E::ExpandNode(const HexMatrix &board)
 {
-    QVector<HexPoint> validMoves = GetValidMoves_E(board);
+    QVector<HexLocation> validMoves = GetValidMoves_E(board);
     for (const auto& move : validMoves)
     {
         root->Expand(new MctsNode(root->Attacker(), move, board.EmptyNum(), root));
     }
 }
 
-void AI_Mcts_E::MctsSearch(int &itCounter, const HexBoard &board)
+void AI_Mcts_E::MctsSearch(int &itCounter, const HexMatrix &board)
 {
     if (parallelized)
     {

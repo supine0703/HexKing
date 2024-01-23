@@ -16,7 +16,7 @@ AI_Mcts_A::AI_Mcts_A(double ecf, qint64 max_decision_time, bool parallelized)
 {
 }
 
-HexPoint AI_Mcts_A::ChooseMove(const HexBoard &board, HexAttacker attacker)
+HexLocation AI_Mcts_A::ChooseMove(const HexMatrix &board, HexAttacker attacker)
 {
     exit = false;
     // Create a new root node for MCTS
@@ -40,7 +40,7 @@ HexPoint AI_Mcts_A::ChooseMove(const HexBoard &board, HexAttacker attacker)
     }
     // Select the child with the highest win ratio as the best move:
     QSharedPointer<MctsNode> bestChild = BestChild();
-    hexLog << bestChild->WinsNum() << bestChild->VisitsNum()
+    hexLog() << bestChild->WinsNum() << bestChild->VisitsNum()
            << "| total:" << root->VisitsNum()
            << "| time:" << usedTime.elapsed()
            << (attacker == HexAttacker::Black ? hlg::bdl : hlg::wdl);
@@ -52,9 +52,9 @@ void AI_Mcts_A::StopWork()
     exit = true;
 }
 
-void AI_Mcts_A::ExpandNode(const QSharedPointer<MctsNode> &node, const HexBoard &board)
+void AI_Mcts_A::ExpandNode(const QSharedPointer<MctsNode> &node, const HexMatrix &board)
 {
-    QVector<HexPoint> validMoves = GetValidMoves(board);
+    QVector<HexLocation> validMoves = GetValidMoves(board);
     for (const auto& move : validMoves)
     {
         root->Expand(new MctsNode(root->Attacker(), move, board.EmptyNum(),root));
@@ -63,7 +63,7 @@ void AI_Mcts_A::ExpandNode(const QSharedPointer<MctsNode> &node, const HexBoard 
 
 void AI_Mcts_A::MtcsSearch(
     int &itCounter,
-    const HexBoard &board,
+    const HexMatrix &board,
     uint number_of_threads)
 {
     while (!exit && usedTime.elapsed() < endTime)
@@ -132,7 +132,7 @@ double AI_Mcts_A::UCTScore(
     }
 }
 
-HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, HexBoard board)
+HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, HexMatrix board)
 {
     // Start the simulation with the player at the node's move
     HexAttacker currentAttacker = node->Attacker();
@@ -140,13 +140,13 @@ HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, Hex
     auto [_r, _c] = node->Move();
     board(_r, _c, currentAttacker);
     // Continue simulation until a winner is detected
-    bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker);
+    bool WinnerDecided(const HexMatrix& board,const HexAttacker& attacker);
     while (!WinnerDecided(board, currentAttacker))
     {
         // Switch player
         currentAttacker = !currentAttacker;
         // Get valid moves
-        QVector<HexPoint> validMoves = GetValidMoves(board);
+        QVector<HexLocation> validMoves = GetValidMoves(board);
         // Generate a distribution and choose a move randomly
         auto [__r, __c] = validMoves[random.bounded(validMoves.size())];
         board(__r, __c, currentAttacker);
@@ -155,7 +155,7 @@ HexAttacker AI_Mcts_A::SimulatePlayout(const QSharedPointer<MctsNode> &node, Hex
 }
 
 QVector<HexAttacker> AI_Mcts_A::ParallelPlayout(QSharedPointer<MctsNode> node,
-    const HexBoard &board,
+                                                const HexMatrix &board,
     uint number_of_threads)
 {
     QVector<std::thread*> threads;
@@ -215,9 +215,9 @@ QSharedPointer<MctsNode> AI_Mcts_A::BestChild()
     return bestChild;
 }
 
-QVector<HexPoint> AI_Mcts_A::GetValidMoves(const HexBoard &board)
+QVector<HexLocation> AI_Mcts_A::GetValidMoves(const HexMatrix &board)
 {
-    QVector<HexPoint> validMoves;
+    QVector<HexLocation> validMoves;
     for (int i = 0, end = board.Order(); i < end; i++)
     {
         for (int j = 0; j < end; j++)
@@ -232,14 +232,14 @@ QVector<HexPoint> AI_Mcts_A::GetValidMoves(const HexBoard &board)
 }
 
 #include <QStack>
-inline bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker)
+inline bool WinnerDecided(const HexMatrix& board,const HexAttacker& attacker)
 {
     int num[2] { 0, 0 };
     int &r = num[0];
     int &c = num[1];
-
-    QStack<HexPoint> stack;
-    QVector<HexPoint> visited;
+    
+    QStack<HexLocation> stack;
+    QVector<HexLocation> visited;
     int order = board.Order();
     for (int &p = num[*(!attacker)]; p < order; p++)
     {
@@ -252,7 +252,7 @@ inline bool WinnerDecided(const HexBoard& board,const HexAttacker& attacker)
     // dfs
     while (!stack.isEmpty())
     {
-        HexPoint coord = stack.pop();
+        HexLocation coord = stack.pop();
         r = coord.row;
         c = coord.col;
 
