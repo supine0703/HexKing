@@ -232,9 +232,17 @@ void PyMcts::init()
 {
 //    class PyThreadStateLock PyThreadLock;
     Py_Initialize();
+    if (!Py_IsInitialized())
+    {
+        Q_ASSERT_X(false, "PyMcts::init()", "Py_IsInitialized false");
+    }
     PyRun_SimpleString("import sys");
     PyRun_SimpleString("sys.path.insert(0,'" AZA_PATH "')");
     PyObject* pModule = PyImport_ImportModule("run_for_cpp");
+    if (!pModule) {
+        PyErr_Print();
+        Py_Finalize();
+    }
     Q_ASSERT(pModule);
     PyObject* pClass = PyObject_GetAttrString(pModule, "CppRun");
     Q_ASSERT(pClass);
